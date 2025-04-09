@@ -1,0 +1,5 @@
+[app]
+Port = 8080
+
+[database]
+Path = "server.db"

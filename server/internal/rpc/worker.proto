@@ -1,0 +1,19 @@
+syntax = "proto3";
+option go_package = "./;rpc";
+package rpc;
+
+service Worker {
+  rpc Inference (InferenceRequest) returns (InferenceResponse) {}
+}
+
+message InferenceRequest {
+  string series = 1;
+  string path = 2;
+  string model = 3;
+}
+
+message InferenceResponse {
+  string series = 1;
+  string predictions = 2;
+  string threshold = 3;
+}

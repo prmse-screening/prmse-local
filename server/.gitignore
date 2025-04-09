@@ -26,3 +26,6 @@ go.work.sum
 
 # Macos
 .DS_Store
+
+# logs
+logs
