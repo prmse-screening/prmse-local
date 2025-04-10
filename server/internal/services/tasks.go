@@ -9,3 +9,7 @@ type TasksService struct {
 func NewTasksService(tasksRepo *db.TasksRepo) *TasksService {
 	return &TasksService{tasksRepo: tasksRepo}
 }
+
+func (s *TasksService) Create() error {
+	return nil
+}

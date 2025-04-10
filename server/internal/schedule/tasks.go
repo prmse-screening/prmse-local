@@ -85,8 +85,8 @@ func (s *TasksScheduler) selectWorker() rpc.WorkerClient {
 	return workers[workerIndex]
 }
 
-func (s *TasksScheduler) Start(ctx context.Context) {
-	s.ctx, s.cancelFunc = context.WithCancel(ctx)
+func (s *TasksScheduler) Start() {
+	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
 
 	for i := 0; i < cap(s.workerSem); i++ {
 		s.workerSem <- struct{}{}

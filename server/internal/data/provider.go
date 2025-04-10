@@ -14,7 +14,7 @@ import (
 	"server/internal/models/entities"
 )
 
-var ProviderSet = wire.NewSet(db.NewTasksRepo, storage.NewMiniRepo, NewDatabase, NewMinioClient)
+var ProviderSet = wire.NewSet(NewDatabase, NewMinioClient, db.NewTasksRepo, storage.NewMiniRepo)
 
 func NewDatabase() (*gorm.DB, error) {
 	dsn := config.Cfg.Database.Path + "?_journal_mode=WAL&_busy_timeout=5000"
@@ -32,7 +32,7 @@ func NewDatabase() (*gorm.DB, error) {
 	return database, nil
 }
 
-func NewMinioClient() *minio.Client {
+func NewMinioClient() (*minio.Client, error) {
 	endpoint := config.Cfg.Minio.Endpoint
 	accessKeyID := config.Cfg.Minio.AccessKey
 	secretAccessKey := config.Cfg.Minio.SecretKey
@@ -43,24 +43,24 @@ func NewMinioClient() *minio.Client {
 	})
 	if err != nil {
 		log.Errorf("Failed to create MinIO client: %s", err.Error())
-		return nil
+		return nil, err
 	}
 
 	bucketName := config.Cfg.Minio.DefaultBucket
 	exists, err := minioClient.BucketExists(context.Background(), bucketName)
 	if err != nil {
 		log.Errorf("Failed to check if bucket exists: %s", err.Error())
-		return nil
+		return nil, err
 	}
 
 	if !exists {
 		err = minioClient.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{})
 		if err != nil {
 			log.Errorf("Failed to create bucket: %s", err.Error())
-			return nil
+			return nil, err
 		}
 		log.Infof("Successfully created bucket %s", bucketName)
 	}
 
-	return minioClient
+	return minioClient, nil
 }

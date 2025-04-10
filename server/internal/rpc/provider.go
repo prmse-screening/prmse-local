@@ -10,7 +10,7 @@ import (
 
 var ProviderSet = wire.NewSet(NewRpcClient)
 
-func NewRpcClient() []WorkerClient {
+func NewRpcClient() *[]WorkerClient {
 	clients := make([]WorkerClient, 0, len(config.Cfg.Workers.Endpoints))
 	for _, endpoint := range config.Cfg.Workers.Endpoints {
 		conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -20,5 +20,5 @@ func NewRpcClient() []WorkerClient {
 		c := NewWorkerClient(conn)
 		clients = append(clients, c)
 	}
-	return clients
+	return &clients
 }
