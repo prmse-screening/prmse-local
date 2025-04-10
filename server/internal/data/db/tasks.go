@@ -68,8 +68,7 @@ func (r *TasksRepo) ListWithPagination(page, pageSize int, status, series string
 func (r *TasksRepo) NextTask() (*entities.Task, error) {
 	var task entities.Task
 	err := r.db.Where("status = ?", "pending").
-		Order("\"order\"").
-		First(&task).Error
+		Order("\"order\"").Take(&task).Error
 
 	if err != nil {
 		return nil, err

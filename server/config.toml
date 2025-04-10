@@ -8,7 +8,7 @@ Path = "server.db"
 Endpoints = ["http://localhost:8080", "http://localhost:8081"]
 
 [minio]
-Path = "server.db"
-Endpoint = "http://localhost:9000"
+Endpoint = "localhost:9000"
 AccessKey = "root"
 SecretKey = "xsd1998715"
+DefaultBucket = "prmse-ct"

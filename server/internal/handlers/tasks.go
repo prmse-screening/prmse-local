@@ -27,7 +27,7 @@ func (h *TasksHandler) CreateTask(c *gin.Context) {
 	}
 
 	var resp responses.BaseResponse
-	if err := h.TasksService.Create(); err != nil {
+	if err := h.tasksService.Create(); err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -28,7 +28,6 @@ func (c *Formatter) Format(entry *log.Entry) ([]byte, error) {
 		),
 	)
 
-	fmt.Println(entry.HasCaller())
 	if entry.HasCaller() {
 		logBuffer.WriteString(fmt.Sprintf("[%s:%d]", entry.Caller.Function, entry.Caller.Line))
 	}
@@ -51,7 +50,7 @@ func Init() {
 
 	log.SetOutput(logFile)
 	log.SetReportCaller(true)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 
 	log.SetFormatter(&Formatter{
 		log.TextFormatter{

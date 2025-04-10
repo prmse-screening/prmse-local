@@ -11,11 +11,11 @@ import (
 var ProviderSet = wire.NewSet(NewRpcClient)
 
 func NewRpcClient() *[]WorkerClient {
-	clients := make([]WorkerClient, 0, len(config.Cfg.Workers.Endpoints))
-	for _, endpoint := range config.Cfg.Workers.Endpoints {
+	clients := make([]WorkerClient, 0, len(config.Cfg.Worker.Endpoints))
+	for _, endpoint := range config.Cfg.Worker.Endpoints {
 		conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
-			log.Fatalf("failed to connect to gRPC server: %v", err)
+			log.Errorf("failed to connect to gRPC server: %v", err)
 		}
 		c := NewWorkerClient(conn)
 		clients = append(clients, c)

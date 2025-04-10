@@ -8,17 +8,26 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 	"server/internal/config"
 	"server/internal/data/db"
 	"server/internal/data/storage"
 	"server/internal/models/entities"
+	"time"
 )
 
 var ProviderSet = wire.NewSet(NewDatabase, NewMinioClient, db.NewTasksRepo, storage.NewMiniRepo)
 
 func NewDatabase() (*gorm.DB, error) {
 	dsn := config.Cfg.Database.Path + "?_journal_mode=WAL&_busy_timeout=5000"
-	database, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+
+	database, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
+		Logger: &sqlLogger{
+			SlowThreshold:             time.Second,
+			IgnoreRecordNotFoundError: true,
+			LogLevel:                  gormLogger.Warn,
+		},
+	})
 	if err != nil {
 		log.Errorf("Failed to connect to database: %s", err.Error())
 		return nil, err

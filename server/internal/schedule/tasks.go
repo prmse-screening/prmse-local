@@ -3,6 +3,7 @@ package schedule
 import (
 	"context"
 	log "github.com/sirupsen/logrus"
+	"server/internal/config"
 	"server/internal/constants/bizErr"
 	"server/internal/data/db"
 	"server/internal/data/storage"
@@ -37,7 +38,6 @@ func (s *TasksScheduler) processNextTask() {
 	defer func() {
 		s.workerSem <- struct{}{}
 	}()
-
 	if err := s.handleNextTask(); err != nil {
 		log.Error(err)
 		time.Sleep(5 * time.Second)
@@ -46,7 +46,7 @@ func (s *TasksScheduler) processNextTask() {
 
 func (s *TasksScheduler) handleNextTask() error {
 	task, err := s.tasksRepo.NextTask()
-	if err != nil {
+	if err != nil || task == nil {
 		return bizErr.RetrieveNextTaskErr
 	}
 
@@ -88,7 +88,7 @@ func (s *TasksScheduler) selectWorker() rpc.WorkerClient {
 func (s *TasksScheduler) Start() {
 	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
 
-	for i := 0; i < cap(s.workerSem); i++ {
+	for i := 0; i < len(config.Cfg.Worker.Endpoints); i++ {
 		s.workerSem <- struct{}{}
 	}
 

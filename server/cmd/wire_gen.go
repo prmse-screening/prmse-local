@@ -4,7 +4,7 @@
 //go:build !wireinject
 // +build !wireinject
 
-package cmd
+package main
 
 import (
 	"github.com/gin-gonic/gin"

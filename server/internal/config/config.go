@@ -21,7 +21,7 @@ func Init() {
 type Config struct {
 	App      AppConfig
 	Database DatabaseConfig
-	Workers  WorkerConfig
+	Worker   WorkerConfig
 	Minio    MinioConfig
 }
 
