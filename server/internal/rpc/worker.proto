@@ -14,6 +14,5 @@ message InferenceRequest {
 
 message InferenceResponse {
   string series = 1;
-  string predictions = 2;
-  string threshold = 3;
+  string result = 2;
 }

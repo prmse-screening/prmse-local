@@ -9,7 +9,7 @@ type Task struct {
 	ID      int64     `gorm:"primaryKey;not null;autoIncrement"`
 	Series  string    `gorm:"unique;not null"`
 	Path    string    `gorm:"not null"`
-	Status  string    `gorm:"default:'pending';not null"`
+	Status  string    `gorm:"default:'Preparing';not null"`
 	Result  string    `gorm:"default:NULL"`
 	Model   string    `gorm:"not null"`
 	Order   int64     `gorm:"not null"`

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"server/internal/config"
 	"server/internal/data"
+	"server/internal/data/db"
 	"server/internal/logger"
 )
 
@@ -12,6 +14,9 @@ import (
 func main() {
 	config.Init()
 	logger.Init()
-	_, _ = data.NewDatabase()
-
+	database, _ := data.NewDatabase()
+	repo := db.NewTasksRepo(database)
+	task, err := repo.NextTask()
+	fmt.Println(task)
+	fmt.Println(err != nil)
 }

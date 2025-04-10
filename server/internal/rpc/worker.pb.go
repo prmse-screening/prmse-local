@@ -84,8 +84,7 @@ func (x *InferenceRequest) GetModel() string {
 type InferenceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Series        string                 `protobuf:"bytes,1,opt,name=series,proto3" json:"series,omitempty"`
-	Predictions   string                 `protobuf:"bytes,2,opt,name=predictions,proto3" json:"predictions,omitempty"`
-	Threshold     string                 `protobuf:"bytes,3,opt,name=threshold,proto3" json:"threshold,omitempty"`
+	Result        string                 `protobuf:"bytes,2,opt,name=result,proto3" json:"result,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -127,16 +126,9 @@ func (x *InferenceResponse) GetSeries() string {
 	return ""
 }
 
-func (x *InferenceResponse) GetPredictions() string {
+func (x *InferenceResponse) GetResult() string {
 	if x != nil {
-		return x.Predictions
-	}
-	return ""
-}
-
-func (x *InferenceResponse) GetThreshold() string {
-	if x != nil {
-		return x.Threshold
+		return x.Result
 	}
 	return ""
 }
@@ -149,11 +141,10 @@ const file_worker_proto_rawDesc = "" +
 	"\x10InferenceRequest\x12\x16\n" +
 	"\x06series\x18\x01 \x01(\tR\x06series\x12\x12\n" +
 	"\x04path\x18\x02 \x01(\tR\x04path\x12\x14\n" +
-	"\x05model\x18\x03 \x01(\tR\x05model\"k\n" +
+	"\x05model\x18\x03 \x01(\tR\x05model\"C\n" +
 	"\x11InferenceResponse\x12\x16\n" +
-	"\x06series\x18\x01 \x01(\tR\x06series\x12 \n" +
-	"\vpredictions\x18\x02 \x01(\tR\vpredictions\x12\x1c\n" +
-	"\tthreshold\x18\x03 \x01(\tR\tthreshold2F\n" +
+	"\x06series\x18\x01 \x01(\tR\x06series\x12\x16\n" +
+	"\x06result\x18\x02 \x01(\tR\x06result2F\n" +
 	"\x06Worker\x12<\n" +
 	"\tInference\x12\x15.rpc.InferenceRequest\x1a\x16.rpc.InferenceResponse\"\x00B\bZ\x06./;rpcb\x06proto3"
 

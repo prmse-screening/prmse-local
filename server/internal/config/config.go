@@ -21,6 +21,8 @@ func Init() {
 type Config struct {
 	App      AppConfig
 	Database DatabaseConfig
+	Workers  WorkerConfig
+	Minio    MinioConfig
 }
 
 type AppConfig struct {
@@ -29,4 +31,15 @@ type AppConfig struct {
 
 type DatabaseConfig struct {
 	Path string
+}
+
+type WorkerConfig struct {
+	Endpoints []string
+}
+
+type MinioConfig struct {
+	Endpoint      string
+	AccessKey     string
+	SecretKey     string
+	DefaultBucket string
 }
