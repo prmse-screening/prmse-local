@@ -30,8 +30,8 @@ func (r *TasksRepo) Update(task *entities.Task) error {
 	return r.db.Save(task).Error
 }
 
-func (r *TasksRepo) Delete(id int64) error {
-	return r.db.Delete(&entities.Task{}, id).Error
+func (r *TasksRepo) Delete(task *entities.Task) error {
+	return r.db.Delete(task).Error
 }
 
 func (r *TasksRepo) ListWithPagination(page, pageSize int, status, series string) ([]*entities.Task, int64, error) {
@@ -67,7 +67,7 @@ func (r *TasksRepo) ListWithPagination(page, pageSize int, status, series string
 
 func (r *TasksRepo) NextTask() (*entities.Task, error) {
 	var task entities.Task
-	err := r.db.Where("status = ?", "pending").
+	err := r.db.Where("status = ?", 1).
 		Order("\"order\"").Take(&task).Error
 
 	if err != nil {

@@ -7,7 +7,7 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
 	"server/internal/data"
 	"server/internal/data/db"
 	"server/internal/data/storage"
@@ -19,21 +19,21 @@ import (
 
 // Injectors from wire.go:
 
-func wireApp() (*gin.Engine, error) {
+func wireApp() (*http.Server, error) {
 	gormDB, err := data.NewDatabase()
 	if err != nil {
 		return nil, err
 	}
 	tasksRepo := db.NewTasksRepo(gormDB)
-	tasksService := services.NewTasksService(tasksRepo)
-	tasksHandler := handlers.NewTasksHandler(tasksService)
-	v := rpc.NewRpcClient()
 	client, err := data.NewMinioClient()
 	if err != nil {
 		return nil, err
 	}
 	miniRepo := storage.NewMiniRepo(client)
+	tasksService := services.NewTasksService(tasksRepo, miniRepo)
+	tasksHandler := handlers.NewTasksHandler(tasksService)
+	v := rpc.NewRpcClient()
 	tasksScheduler := schedule.NewTasksScheduler(tasksRepo, v, miniRepo)
-	engine := NewServer(tasksHandler, tasksScheduler)
-	return engine, nil
+	server := NewServer(tasksHandler, tasksScheduler)
+	return server, nil
 }

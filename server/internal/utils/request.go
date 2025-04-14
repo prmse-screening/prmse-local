@@ -3,7 +3,7 @@ package utils
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"server/internal/constants/bizErr"
+	"server/internal/commons/bizErr"
 	"server/internal/models/responses"
 )
 

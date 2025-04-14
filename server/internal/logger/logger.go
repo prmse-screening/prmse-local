@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"strings"
 	"time"
@@ -40,15 +39,16 @@ func Init() {
 		_ = os.Mkdir("logs", os.ModePerm)
 	}
 
-	logFile := &lumberjack.Logger{
-		Filename:   "logs/app.log",
-		MaxSize:    100,
-		MaxBackups: 3,
-		MaxAge:     28,
-		Compress:   true,
-	}
+	//logFile := &lumberjack.Logger{
+	//	Filename:   "logs/app.log",
+	//	MaxSize:    100,
+	//	MaxBackups: 3,
+	//	MaxAge:     28,
+	//	Compress:   true,
+	//}
 
-	log.SetOutput(logFile)
+	//log.SetOutput(logFile)
+	log.SetOutput(os.Stdout)
 	log.SetReportCaller(true)
 	log.SetLevel(log.InfoLevel)
 

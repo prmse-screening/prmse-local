@@ -2,9 +2,12 @@ package schedule
 
 import (
 	"context"
+	"errors"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+	"server/internal/commons/bizErr"
+	"server/internal/commons/enums"
 	"server/internal/config"
-	"server/internal/constants/bizErr"
 	"server/internal/data/db"
 	"server/internal/data/storage"
 	"server/internal/rpc"
@@ -46,11 +49,15 @@ func (s *TasksScheduler) processNextTask() {
 
 func (s *TasksScheduler) handleNextTask() error {
 	task, err := s.tasksRepo.NextTask()
-	if err != nil || task == nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return bizErr.RetrieveNextTaskErr
 	}
 
-	task.Status = "Processing"
+	if task == nil {
+		return nil
+	}
+
+	task.Status = enums.Processing
 	if err = s.tasksRepo.Update(task); err != nil {
 		return bizErr.UpdateTaskErr
 	}
@@ -59,6 +66,7 @@ func (s *TasksScheduler) handleNextTask() error {
 	reqCtx, cancel := context.WithTimeout(s.ctx, 10*time.Minute)
 	defer cancel()
 
+	s.minioRepo.GetPresignedDownloadURL(s.ctx, task.Path, 10*time.Minute)
 	resp, err := worker.Inference(reqCtx, &rpc.InferenceRequest{
 		Model:  task.Model,
 		Path:   task.Path,
@@ -66,9 +74,9 @@ func (s *TasksScheduler) handleNextTask() error {
 	})
 
 	if err != nil {
-		task.Status = "failed"
+		task.Status = enums.Failed
 	} else {
-		task.Status = "completed"
+		task.Status = enums.Completed
 		task.Result = resp.Result
 	}
 

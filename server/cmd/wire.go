@@ -4,8 +4,8 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"net/http"
 	"server/internal/data"
 	"server/internal/handlers"
 	"server/internal/rpc"
@@ -13,7 +13,7 @@ import (
 	"server/internal/services"
 )
 
-func wireApp() (*gin.Engine, error) {
+func wireApp() (*http.Server, error) {
 	wire.Build(
 		data.ProviderSet,
 		rpc.ProviderSet,

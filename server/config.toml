@@ -5,7 +5,7 @@ Port = 8080
 Path = "server.db"
 
 [worker]
-Endpoints = ["http://localhost:8080", "http://localhost:8081"]
+Endpoints = ["http://localhost:8080"]
 
 [minio]
 Endpoint = "localhost:9000"
