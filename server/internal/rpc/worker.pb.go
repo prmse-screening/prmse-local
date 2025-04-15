@@ -24,7 +24,7 @@ const (
 type InferenceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Series        string                 `protobuf:"bytes,1,opt,name=series,proto3" json:"series,omitempty"`
-	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+	Paths         []string               `protobuf:"bytes,2,rep,name=paths,proto3" json:"paths,omitempty"`
 	Model         string                 `protobuf:"bytes,3,opt,name=model,proto3" json:"model,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -67,11 +67,11 @@ func (x *InferenceRequest) GetSeries() string {
 	return ""
 }
 
-func (x *InferenceRequest) GetPath() string {
+func (x *InferenceRequest) GetPaths() []string {
 	if x != nil {
-		return x.Path
+		return x.Paths
 	}
-	return ""
+	return nil
 }
 
 func (x *InferenceRequest) GetModel() string {
@@ -137,10 +137,10 @@ var File_worker_proto protoreflect.FileDescriptor
 
 const file_worker_proto_rawDesc = "" +
 	"\n" +
-	"\fworker.proto\x12\x03rpc\"T\n" +
+	"\fworker.proto\x12\x03rpc\"V\n" +
 	"\x10InferenceRequest\x12\x16\n" +
-	"\x06series\x18\x01 \x01(\tR\x06series\x12\x12\n" +
-	"\x04path\x18\x02 \x01(\tR\x04path\x12\x14\n" +
+	"\x06series\x18\x01 \x01(\tR\x06series\x12\x14\n" +
+	"\x05paths\x18\x02 \x03(\tR\x05paths\x12\x14\n" +
 	"\x05model\x18\x03 \x01(\tR\x05model\"C\n" +
 	"\x11InferenceResponse\x12\x16\n" +
 	"\x06series\x18\x01 \x01(\tR\x06series\x12\x16\n" +

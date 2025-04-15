@@ -2,14 +2,12 @@ package services
 
 import (
 	"context"
-	"github.com/jinzhu/copier"
 	log "github.com/sirupsen/logrus"
 	"server/internal/commons/bizErr"
+	"server/internal/config"
 	"server/internal/data/db"
 	"server/internal/data/storage"
 	"server/internal/models/entities"
-	"server/internal/models/requests"
-	"server/internal/models/responses"
 	"time"
 )
 
@@ -25,69 +23,62 @@ func NewTasksService(tasksRepo *db.TasksRepo, miniRepo *storage.MiniRepo) *Tasks
 	}
 }
 
-func (s *TasksService) Create(req *requests.CreateTaskRequest) (*responses.CreateTaskResponse, error) {
-	task := entities.Task{
-		Series: req.Series,
-		Model:  "Sybil",
-		Path:   req.Series,
-	}
-	err := s.tasksRepo.Create(&task)
+func (s *TasksService) Create(task *entities.Task) error {
+	err := s.tasksRepo.Create(task)
 	if err != nil {
-		log.Errorf("create task failed, series [%s]", req.Series)
-		return nil, bizErr.CreateTaskErr
+		log.Errorf("create task failed, series [%s]", task.Series)
+		return bizErr.CreateTaskErr
 	}
-
-	resp := responses.CreateTaskResponse{}
-	_ = copier.Copy(&resp, task)
-
-	return &resp, nil
+	return nil
 }
 
-func (s *TasksService) Update(req *requests.UpdateTaskRequest) error {
-	var task entities.Task
-	_ = copier.Copy(&task, req)
-	err := s.tasksRepo.Update(&task)
-	if err != nil {
-		log.Errorf("update task failed, series [%s]", req.Series)
+func (s *TasksService) Update(task *entities.Task) error {
+	if err := s.tasksRepo.Update(task); err != nil {
+		log.Errorf("update task failed, series [%s]", task.Series)
 		return bizErr.UpdateTaskErr
 	}
 	return nil
 }
 
-func (s *TasksService) Delete(req *requests.DeleteTaskRequest) error {
-	var task entities.Task
-	_ = copier.Copy(&task, req)
-	err := s.tasksRepo.Delete(&task)
+func (s *TasksService) Delete(task *entities.Task) error {
+	err := s.tasksRepo.Delete(task)
 	if err != nil {
-		log.Errorf("delete task failed, series [%s]", req.Series)
+		log.Errorf("delete task failed, series [%s]", task.Series)
 		return bizErr.DeleteTaskErr
 	}
-	err = s.minioRepo.DeleteFolder(context.Background(), req.Path)
+	err = s.minioRepo.DeleteFolder(context.Background(), task.Path)
 	if err != nil {
-		log.Errorf("delete folder failed, path [%s], error [%s]", req.Path, err)
+		log.Errorf("delete folder failed, path [%s], error [%s]", task.Path, err)
 		return bizErr.DeleteTaskErr
 	}
 	return nil
 }
 
-func (s *TasksService) GetUploadUrl(path string) (*responses.GetUploadUrlResponse, error) {
+func (s *TasksService) GetUploadUrl(path string) (string, map[string]string, error) {
 	url, form, err := s.minioRepo.GetPresignedPostFolderUploadURL(context.Background(), path, time.Hour)
 	if err != nil {
 		log.Error("get upload url failed, path [%s], error [%s]", path, err)
-		return nil, bizErr.GetPostUrlErr
+		return "", nil, err
 	}
-	return &responses.GetUploadUrlResponse{
-		Url:  url,
-		Form: form,
-	}, nil
+	return url, form, nil
 }
 
-func (s *TasksService) ListP(req *requests.UpdateTaskRequest) error {
-	var task entities.Task
-	_ = copier.Copy(&task, req)
-	err := s.tasksRepo.Update(&task)
+func (s *TasksService) GetListPagination(page, pageSize int, series, status string) ([]*entities.Task, int64, error) {
+	tasks, total, err := s.tasksRepo.ListWithPagination(page, pageSize, series, status)
 	if err != nil {
+		return nil, 0, bizErr.GetTasksErr
+	}
+	return tasks, total, nil
+}
+
+func (s *TasksService) Prioritize(task *entities.Task) error {
+	task.Order = task.Order - (time.Hour * 24).Milliseconds()
+	if err := s.Update(task); err != nil {
 		return bizErr.UpdateTaskErr
 	}
 	return nil
+}
+
+func (s *TasksService) SetWorkerDevice(cpu bool) {
+	config.Cfg.Worker.Cpu = cpu
 }

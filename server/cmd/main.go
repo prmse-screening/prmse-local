@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func NewServer(t *handlers.TasksHandler, ts *schedule.TasksScheduler) *http.Server {
+func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.TasksScheduler) *http.Server {
 	//gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	engine.Use(gin.Recovery(), middlewares.Logger(), cors.Default())
@@ -31,8 +31,16 @@ func NewServer(t *handlers.TasksHandler, ts *schedule.TasksScheduler) *http.Serv
 	{
 		tasks.POST("/create", t.CreateTask)
 		tasks.POST("/update", t.UpdateTask)
+		tasks.POST("/prioritize", t.PrioritizeTask)
 		tasks.POST("/delete", t.DeleteTask)
 		tasks.GET("/upload", t.GetUploadUrl)
+		tasks.GET("/list", t.GetListPagination)
+		tasks.GET("/device", t.SetWorkerDevice)
+	}
+
+	dicom := engine.Group("/dicom")
+	{
+		dicom.GET("/:series/:file", d.Redirect)
 	}
 
 	srv := &http.Server{

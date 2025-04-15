@@ -6,6 +6,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"net/url"
 	"server/internal/config"
+	"sort"
 	"strings"
 	"time"
 )
@@ -34,6 +35,34 @@ func (r *MiniRepo) GetPresignedDownloadURL(ctx context.Context, objectName strin
 		return "", err
 	}
 	return presignedURL.String(), nil
+}
+
+// GetPresignedDownloadUrls Get presigned download URLs, which can be used to download the all files in a folder.
+func (r *MiniRepo) GetPresignedDownloadUrls(ctx context.Context, folderPath string, expiry time.Duration) ([]string, error) {
+	objects := r.client.ListObjects(ctx, r.bucketName, minio.ListObjectsOptions{
+		Prefix:    folderPath,
+		Recursive: true,
+	})
+
+	var objectKeys []string
+	for object := range objects {
+		if object.Err != nil {
+			return nil, object.Err
+		}
+		objectKeys = append(objectKeys, object.Key)
+	}
+
+	sort.Strings(objectKeys)
+
+	var urls []string
+	for _, objectKey := range objectKeys {
+		presignedURL, err := r.client.PresignedGetObject(ctx, r.bucketName, objectKey, expiry, nil)
+		if err != nil {
+			return nil, err
+		}
+		urls = append(urls, presignedURL.String())
+	}
+	return urls, nil
 }
 
 // GetPresignedPostFolderUploadURL Get presigned post folder upload URL, which can be used to upload files to the specified folder

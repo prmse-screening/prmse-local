@@ -4,6 +4,9 @@ import grpc
 import asyncio
 import worker_pb2
 import worker_pb2_grpc
+from sybil import Sybil
+
+model = Sybil()
 
 
 class WorkerServicer(worker_pb2_grpc.WorkerServicer):

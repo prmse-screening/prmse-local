@@ -8,7 +8,7 @@ service Worker {
 
 message InferenceRequest {
   string series = 1;
-  string path = 2;
+  repeated string paths = 2;
   string model = 3;
 }
 

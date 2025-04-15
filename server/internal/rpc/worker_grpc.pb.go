@@ -22,7 +22,7 @@ const (
 	Worker_Inference_FullMethodName = "/rpc.Worker/Inference"
 )
 
-// WorkerClient is the client API for Worker services.
+// WorkerClient is the client API for Worker service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkerClient interface {
@@ -47,7 +47,7 @@ func (c *workerClient) Inference(ctx context.Context, in *InferenceRequest, opts
 	return out, nil
 }
 
-// WorkerServer is the server API for Worker services.
+// WorkerServer is the server API for Worker service.
 // All implementations must embed UnimplementedWorkerServer
 // for forward compatibility.
 type WorkerServer interface {
@@ -68,9 +68,9 @@ func (UnimplementedWorkerServer) Inference(context.Context, *InferenceRequest) (
 func (UnimplementedWorkerServer) mustEmbedUnimplementedWorkerServer() {}
 func (UnimplementedWorkerServer) testEmbeddedByValue()                {}
 
-// UnsafeWorkerServer may be embedded to opt out of forward compatibility for this services.
+// UnsafeWorkerServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to WorkerServer will
-// result in compilation bizErr.
+// result in compilation errors.
 type UnsafeWorkerServer interface {
 	mustEmbedUnimplementedWorkerServer()
 }
@@ -104,7 +104,7 @@ func _Worker_Inference_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-// Worker_ServiceDesc is the grpc.ServiceDesc for Worker services.
+// Worker_ServiceDesc is the grpc.ServiceDesc for Worker service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Worker_ServiceDesc = grpc.ServiceDesc{

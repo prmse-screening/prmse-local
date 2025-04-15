@@ -2,4 +2,4 @@ package services
 
 import "github.com/google/wire"
 
-var ServiceSet = wire.NewSet(NewTasksService)
+var ServiceSet = wire.NewSet(NewTasksService, NewDicomService)

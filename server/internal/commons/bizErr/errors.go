@@ -13,4 +13,6 @@ var (
 	UpdateTaskErr       = errors.New("update task failed")
 	DeleteTaskErr       = errors.New("delete task failed")
 	GetPostUrlErr       = errors.New("get post url failed")
+	GetDownloadUrlsErr  = errors.New("get download urls failed")
+	GetTasksErr         = errors.New("get tasks failed")
 )

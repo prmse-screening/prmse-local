@@ -35,6 +35,7 @@ type DatabaseConfig struct {
 
 type WorkerConfig struct {
 	Endpoints []string
+	Cpu       bool
 }
 
 type MinioConfig struct {

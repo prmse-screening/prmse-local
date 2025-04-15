@@ -63,13 +63,16 @@ func (s *TasksScheduler) handleNextTask() error {
 	}
 
 	worker := s.selectWorker()
-	reqCtx, cancel := context.WithTimeout(s.ctx, 10*time.Minute)
-	defer cancel()
+	//reqCtx, cancel := context.WithTimeout(s.ctx, time.Hour)
+	//defer cancel()
 
-	s.minioRepo.GetPresignedDownloadURL(s.ctx, task.Path, 10*time.Minute)
-	resp, err := worker.Inference(reqCtx, &rpc.InferenceRequest{
+	urls, err := s.minioRepo.GetPresignedDownloadUrls(s.ctx, task.Path, time.Hour)
+	if err != nil {
+		return bizErr.GetDownloadUrlsErr
+	}
+	resp, err := worker.Inference(s.ctx, &rpc.InferenceRequest{
 		Model:  task.Model,
-		Path:   task.Path,
+		Paths:  urls,
 		Series: task.Series,
 	})
 

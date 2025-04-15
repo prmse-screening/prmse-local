@@ -10,7 +10,7 @@ def get_default_device():
         return get_most_free_gpu()
     elif torch.backends.mps.is_available():
         # Not all operations implemented in MPS yet
-        use_mps = os.environ.get("PYTORCH_ENABLE_MPS_FALLBACK", "0") == "1"
+        use_mps = os.environ.get("PYTORCH_ENABLE_MPS_FALLBACK", "1") == "1"
         if use_mps:
             return torch.device('mps')
         else:

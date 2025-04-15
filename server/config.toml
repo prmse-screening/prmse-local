@@ -6,6 +6,7 @@ Path = "server.db"
 
 [worker]
 Endpoints = ["http://localhost:8080"]
+Cpu = false
 
 [minio]
 Endpoint = "localhost:9000"

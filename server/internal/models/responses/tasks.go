@@ -2,6 +2,7 @@ package responses
 
 import (
 	"server/internal/commons/enums"
+	"server/internal/models/entities"
 	"time"
 )
 
@@ -19,4 +20,9 @@ type CreateTaskResponse struct {
 type GetUploadUrlResponse struct {
 	Url  string            `json:"url"`
 	Form map[string]string `json:"form"`
+}
+
+type GetTaskLists struct {
+	Tasks []*entities.Task `json:"tasks"`
+	Total int64            `json:"total"`
 }
