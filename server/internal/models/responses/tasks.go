@@ -9,7 +9,6 @@ import (
 type CreateTaskResponse struct {
 	ID      int64           `json:"id"`
 	Series  string          `json:"series"`
-	Path    string          `json:"path"`
 	Status  enums.TaskState `json:"status"`
 	Result  string          `json:"result"`
 	Model   string          `json:"model"`
