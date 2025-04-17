@@ -47,6 +47,7 @@ import { getSeries } from '@/utils/dicom.ts'
 import { createTask, getUploadUrl, updateTask } from '@/apis'
 import { uploadToS3 } from '@/apis/common.ts'
 import { TaskState } from '@/types'
+import { AsyncZipDeflate, Zip, zipSync } from 'fflate'
 
 const curr = ref('')
 const isProcessing = ref(false)
@@ -103,26 +104,42 @@ const upload = async () => {
 
         const uploadInfo = await getUploadUrl({ series: group.series })
         if (!uploadInfo) continue
-        const key = uploadInfo.form.key
 
-        let j = 0
-        const CHUNK_SIZE = 6
-        while (j < group.files.length) {
-            const chunk = group.files.slice(j, j + CHUNK_SIZE)
-            await Promise.all(
-                chunk.map(async (file) => {
-                    uploadInfo.form.key = `${key}${file.name}`
-                    await uploadToS3(uploadInfo.url, uploadInfo.form, file)
+        const chunks: Uint8Array[] = []
+        const zip = new Zip()
+
+        zip.ondata = async (err, chunk, final) => {
+            if (err) {
+                console.error('Error during compression:', err)
+                return
+            }
+
+            chunks.push(chunk)
+
+            if (final) {
+                const zipBlob = new Blob(chunks, { type: 'application/zip' })
+                const zipFile = new File([zipBlob], 'c.zip', {
+                    type: 'application/zip',
+                    lastModified: new Date().getTime(),
                 })
-            )
-            group.index.value += CHUNK_SIZE
-            j += CHUNK_SIZE
+                await uploadToS3(uploadInfo.url, uploadInfo.form, zipFile)
+                task.status = TaskState.Pending
+                await updateTask(task)
+                emit('onUploaded')
+                console.log(final)
+            }
         }
-        task.status = TaskState.Pending
-        await updateTask(task)
-        emit('onUploaded')
+
+        for (const file of group.files) {
+            const arrayBuffer = await file.arrayBuffer()
+            const fileData = new Uint8Array(arrayBuffer)
+            const fileEntry = new AsyncZipDeflate(file.name)
+            zip.add(fileEntry)
+            fileEntry.push(fileData, true)
+            group.index.value++
+        }
+        zip.end()
     }
-    await new Promise((resolve) => setTimeout(resolve, 3000))
     isUploading.value = false
 }
 </script>

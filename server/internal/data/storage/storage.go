@@ -68,18 +68,19 @@ func (r *MiniRepo) GetPresignedDownloadUrls(ctx context.Context, folderPath stri
 // GetPresignedPostFolderUploadURL Get presigned post folder upload URL, which can be used to upload files to the specified folder
 func (r *MiniRepo) GetPresignedPostFolderUploadURL(ctx context.Context, folderPath string, expiry time.Duration) (string, map[string]string, error) {
 	policy := minio.NewPostPolicy()
-	err := policy.SetBucket(r.bucketName)
-	if err != nil {
+	if err := policy.SetKey(folderPath); err != nil {
+		return "", nil, fmt.Errorf("failed to set key prefix: %w", err)
+	}
+	if err := policy.SetBucket(r.bucketName); err != nil {
 		return "", nil, fmt.Errorf("failed to set bucket: %w", err)
 	}
 
-	err = policy.SetKeyStartsWith(folderPath + "/")
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to set key prefix: %w", err)
-	}
+	//err = policy.SetKeyStartsWith(folderPath + "/")
+	//if err != nil {
+	//	return "", nil, fmt.Errorf("failed to set key prefix: %w", err)
+	//}
 
-	err = policy.SetExpires(time.Now().Add(expiry))
-	if err != nil {
+	if err := policy.SetExpires(time.Now().Add(expiry)); err != nil {
 		return "", nil, fmt.Errorf("failed to set expiration: %w", err)
 	}
 
