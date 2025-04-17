@@ -33,9 +33,9 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 		tasks.POST("/update", t.UpdateTask)
 		tasks.POST("/prioritize", t.PrioritizeTask)
 		tasks.POST("/delete", t.DeleteTask)
+		tasks.POST("/device", t.SetWorkerDevice)
 		tasks.GET("/upload", t.GetUploadUrl)
 		tasks.GET("/list", t.GetListPagination)
-		tasks.GET("/device", t.SetWorkerDevice)
 	}
 
 	dicom := engine.Group("/dicom")
@@ -50,11 +50,11 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Errorf("Shutdown Server with error: %s", err)
+			log.Errorf("Shutdown Server with error: %v", err)
 		}
 	}()
 
-	go ts.Start()
+	//go ts.Start()
 	return srv
 }
 
@@ -66,10 +66,10 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutting down server...")
+	log.Infof("Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown: ", err)
+		log.Infof("Server forced to shutdown: %v", err)
 	}
 }

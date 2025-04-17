@@ -29,12 +29,12 @@ func NewDatabase() (*gorm.DB, error) {
 		},
 	})
 	if err != nil {
-		log.Errorf("Failed to connect to database: %s", err)
+		log.Errorf("Failed to connect to database: %v", err)
 		return nil, err
 	}
 
 	if err = database.AutoMigrate(&entities.Task{}); err != nil {
-		log.Errorf("AutoMigrate failed: %s", err)
+		log.Errorf("AutoMigrate failed: %v", err)
 		return nil, err
 	}
 
@@ -51,21 +51,21 @@ func NewMinioClient() (*minio.Client, error) {
 		Secure: false,
 	})
 	if err != nil {
-		log.Errorf("Failed to create MinIO client: %s", err)
+		log.Errorf("Failed to create MinIO client: %v", err)
 		return nil, err
 	}
 
 	bucketName := config.Cfg.Minio.DefaultBucket
 	exists, err := minioClient.BucketExists(context.Background(), bucketName)
 	if err != nil {
-		log.Errorf("Failed to check if bucket exists: %s", err)
+		log.Errorf("Failed to check if bucket exists: %v", err)
 		return nil, err
 	}
 
 	if !exists {
 		err = minioClient.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{})
 		if err != nil {
-			log.Errorf("Failed to create bucket: %s", err)
+			log.Errorf("Failed to create bucket: %v", err)
 			return nil, err
 		}
 		log.Infof("Successfully created bucket %s", bucketName)

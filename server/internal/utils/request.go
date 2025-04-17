@@ -10,7 +10,7 @@ import (
 func Bind[T any](c *gin.Context, request T) error {
 	if err := c.ShouldBind(request); err != nil {
 		var res responses.BaseResponse
-		res.ErrorResponse(c, http.StatusBadRequest, bizErr.ParseParamsErr)
+		res.ErrorResponse(c, http.StatusBadRequest, bizErr.ParseParamsErr.Error())
 		return err
 	}
 	return nil

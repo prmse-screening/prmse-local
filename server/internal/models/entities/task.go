@@ -7,14 +7,13 @@ import (
 )
 
 type Task struct {
-	ID      int64           `gorm:"primaryKey;not null;autoIncrement"`
-	Series  string          `gorm:"unique;not null"`
-	Path    string          `gorm:"not null"`
-	Status  enums.TaskState `gorm:"default:0;not null"`
-	Result  string          `gorm:"default:null"`
-	Model   string          `gorm:"not null"`
-	Order   int64           `gorm:"not null"`
-	Updated time.Time       `gorm:"not null"`
+	ID      int64           `gorm:"primaryKey;not null;autoIncrement" json:"id"`
+	Series  string          `gorm:"unique;not null" json:"series"`
+	Status  enums.TaskState `gorm:"default:0;not null" json:"status"`
+	Result  string          `gorm:"default:null" json:"result"`
+	Model   string          `gorm:"not null" json:"model"`
+	Order   int64           `gorm:"not null" json:"order"`
+	Updated time.Time       `gorm:"not null" json:"updated"`
 }
 
 func (t *Task) BeforeUpdate(_ *gorm.DB) (err error) {

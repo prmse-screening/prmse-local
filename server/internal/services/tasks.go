@@ -8,6 +8,7 @@ import (
 	"server/internal/data/db"
 	"server/internal/data/storage"
 	"server/internal/models/entities"
+	"strconv"
 	"time"
 )
 
@@ -46,18 +47,26 @@ func (s *TasksService) Delete(task *entities.Task) error {
 		log.Errorf("delete task failed, series [%s]", task.Series)
 		return bizErr.DeleteTaskErr
 	}
-	err = s.minioRepo.DeleteFolder(context.Background(), task.Path)
+
+	folder := strconv.FormatInt(task.ID, 10)
+	err = s.minioRepo.DeleteFolder(context.Background(), folder)
 	if err != nil {
-		log.Errorf("delete folder failed, path [%s], error [%s]", task.Path, err)
+		log.Errorf("delete folder failed, path [%s], error [%v]", folder, err)
 		return bizErr.DeleteTaskErr
 	}
 	return nil
 }
 
-func (s *TasksService) GetUploadUrl(path string) (string, map[string]string, error) {
-	url, form, err := s.minioRepo.GetPresignedPostFolderUploadURL(context.Background(), path, time.Hour)
+func (s *TasksService) GetUploadUrl(series string) (string, map[string]string, error) {
+	task, err := s.tasksRepo.GetBySeries(series)
 	if err != nil {
-		log.Error("get upload url failed, path [%s], error [%s]", path, err)
+		log.Errorf("get task failed, series [%s], error [%v]", series, err)
+		return "", nil, err
+	}
+	folder := strconv.FormatInt(task.ID, 10)
+	url, form, err := s.minioRepo.GetPresignedPostFolderUploadURL(context.Background(), folder, time.Hour)
+	if err != nil {
+		log.Errorf("get upload url failed, id [%d], error [%v]", task.ID, err)
 		return "", nil, err
 	}
 	return url, form, nil

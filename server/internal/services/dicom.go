@@ -22,7 +22,7 @@ func (s *DicomService) Redirect(series string, file string) (string, error) {
 	objName := fmt.Sprintf("%s/%s", series, file)
 	url, err := s.minioRepo.GetPresignedDownloadURL(context.Background(), objName, time.Hour)
 	if err != nil {
-		log.Errorf("get presigned download url failed, series [%s], file [%s], error [%s]", series, file, err)
+		log.Errorf("get presigned download url failed, series [%s], file [%s], error [%v]", series, file, err)
 		return "", err
 	}
 	return url, nil

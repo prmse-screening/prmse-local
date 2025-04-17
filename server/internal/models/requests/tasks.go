@@ -12,7 +12,6 @@ type CreateTaskRequest struct {
 type UpdateTaskRequest struct {
 	ID      int64           `json:"id"`
 	Series  string          `json:"series"`
-	Path    string          `json:"path"`
 	Status  enums.TaskState `json:"status"`
 	Result  string          `json:"result"`
 	Model   string          `json:"model"`
@@ -23,7 +22,6 @@ type UpdateTaskRequest struct {
 type DeleteTaskRequest struct {
 	ID      int64           `json:"id"`
 	Series  string          `json:"series"`
-	Path    string          `json:"path"`
 	Status  enums.TaskState `json:"status"`
 	Result  string          `json:"result"`
 	Model   string          `json:"model"`

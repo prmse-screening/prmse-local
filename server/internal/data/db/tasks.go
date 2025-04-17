@@ -17,6 +17,15 @@ func (r *TasksRepo) Create(task *entities.Task) error {
 	return r.db.Create(task).Error
 }
 
+func (r *TasksRepo) GetTask(id int64) (*entities.Task, error) {
+	var task entities.Task
+	err := r.db.Where("id = ?", id).First(&task).Error
+	if err != nil {
+		return nil, err
+	}
+	return &task, nil
+}
+
 func (r *TasksRepo) GetBySeries(series string) (*entities.Task, error) {
 	var task entities.Task
 	err := r.db.Where("series = ?", series).First(&task).Error

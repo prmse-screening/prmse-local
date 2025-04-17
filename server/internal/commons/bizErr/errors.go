@@ -9,7 +9,7 @@ var (
 // task error
 var (
 	RetrieveNextTaskErr = errors.New("retrieve next task failed")
-	CreateTaskErr       = errors.New("create task failed")
+	CreateTaskErr       = errors.New("create task failed, task may already exist")
 	UpdateTaskErr       = errors.New("update task failed")
 	DeleteTaskErr       = errors.New("delete task failed")
 	GetPostUrlErr       = errors.New("get post url failed")

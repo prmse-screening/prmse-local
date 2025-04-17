@@ -2,15 +2,14 @@ package schedule
 
 import (
 	"context"
-	"errors"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 	"server/internal/commons/bizErr"
 	"server/internal/commons/enums"
 	"server/internal/config"
 	"server/internal/data/db"
 	"server/internal/data/storage"
 	"server/internal/rpc"
+	"strconv"
 	"sync/atomic"
 	"time"
 )
@@ -42,14 +41,14 @@ func (s *TasksScheduler) processNextTask() {
 		s.workerSem <- struct{}{}
 	}()
 	if err := s.handleNextTask(); err != nil {
-		log.Error(err)
+		log.Errorf("%v", err)
 		time.Sleep(5 * time.Second)
 	}
 }
 
 func (s *TasksScheduler) handleNextTask() error {
 	task, err := s.tasksRepo.NextTask()
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		return bizErr.RetrieveNextTaskErr
 	}
 
@@ -66,7 +65,8 @@ func (s *TasksScheduler) handleNextTask() error {
 	//reqCtx, cancel := context.WithTimeout(s.ctx, time.Hour)
 	//defer cancel()
 
-	urls, err := s.minioRepo.GetPresignedDownloadUrls(s.ctx, task.Path, time.Hour)
+	folder := strconv.FormatInt(task.ID, 10)
+	urls, err := s.minioRepo.GetPresignedDownloadUrls(s.ctx, folder, time.Hour)
 	if err != nil {
 		return bizErr.GetDownloadUrlsErr
 	}

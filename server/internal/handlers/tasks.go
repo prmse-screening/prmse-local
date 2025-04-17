@@ -31,17 +31,16 @@ func (h *TasksHandler) CreateTask(c *gin.Context) {
 	task := entities.Task{
 		Series: req.Series,
 		Model:  "Sybil",
-		Path:   req.Series,
 	}
 
 	var resp responses.BaseResponse
 	err := h.tasksService.Create(&task)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	data := responses.CreateTaskResponse{}
-	_ = copier.Copy(&resp, task)
+	_ = copier.Copy(&data, &task)
 	resp.SuccessResponse(c, http.StatusOK, data)
 }
 
@@ -55,10 +54,10 @@ func (h *TasksHandler) UpdateTask(c *gin.Context) {
 
 	var resp responses.BaseResponse
 	if err := h.tasksService.Update(&task); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	resp.SuccessResponse(c, http.StatusOK, nil)
+	resp.SuccessResponse(c, http.StatusOK, "success")
 }
 
 func (h *TasksHandler) PrioritizeTask(c *gin.Context) {
@@ -71,10 +70,10 @@ func (h *TasksHandler) PrioritizeTask(c *gin.Context) {
 
 	var resp responses.BaseResponse
 	if err := h.tasksService.Prioritize(&task); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	resp.SuccessResponse(c, http.StatusOK, nil)
+	resp.SuccessResponse(c, http.StatusOK, "success")
 }
 
 func (h *TasksHandler) GetListPagination(c *gin.Context) {
@@ -84,14 +83,14 @@ func (h *TasksHandler) GetListPagination(c *gin.Context) {
 	series := c.Query("series")
 	var resp responses.BaseResponse
 	if pageParam == "" || pageSizeParam == "" {
-		resp.ErrorResponse(c, http.StatusBadRequest, bizErr.ParseParamsErr)
+		resp.ErrorResponse(c, http.StatusBadRequest, bizErr.ParseParamsErr.Error())
 		return
 	}
 	page, _ := strconv.Atoi(pageParam)
 	pageSize, _ := strconv.Atoi(pageSizeParam)
 	tasks, total, err := h.tasksService.GetListPagination(page, pageSize, status, series)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	resp.SuccessResponse(c, http.StatusOK, responses.GetTaskLists{
@@ -110,22 +109,22 @@ func (h *TasksHandler) DeleteTask(c *gin.Context) {
 
 	var resp responses.BaseResponse
 	if err := h.tasksService.Delete(&task); err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	resp.SuccessResponse(c, http.StatusOK, nil)
+	resp.SuccessResponse(c, http.StatusOK, "success")
 }
 
 func (h *TasksHandler) GetUploadUrl(c *gin.Context) {
-	path := c.Query("path")
+	series := c.Query("series")
 	var resp responses.BaseResponse
-	if path == "" {
+	if series == "" {
 		resp.ErrorResponse(c, http.StatusBadRequest, bizErr.ParseParamsErr)
 		return
 	}
-	url, form, err := h.tasksService.GetUploadUrl(path)
+	url, form, err := h.tasksService.GetUploadUrl(series)
 	if err != nil {
-		resp.ErrorResponse(c, http.StatusInternalServerError, err)
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	resp.SuccessResponse(c, http.StatusOK, responses.GetUploadUrlResponse{
@@ -136,4 +135,6 @@ func (h *TasksHandler) GetUploadUrl(c *gin.Context) {
 
 func (h *TasksHandler) SetWorkerDevice(c *gin.Context) {
 	h.tasksService.SetWorkerDevice(c.Query("device") == "cpu")
+	var resp responses.BaseResponse
+	resp.SuccessResponse(c, http.StatusOK, "success")
 }

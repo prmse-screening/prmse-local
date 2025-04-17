@@ -15,11 +15,11 @@
             </v-navigation-drawer>
 
             <v-main>
-                <v-container height="100vh" fluid>
+                <router-view v-slot="{ Component }">
                     <v-fade-transition hide-on-leave>
-                        <router-view />
+                        <component :is="Component" />
                     </v-fade-transition>
-                </v-container>
+                </router-view>
             </v-main>
         </v-layout>
     </v-card>
