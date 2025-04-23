@@ -15,6 +15,7 @@ export default defineConfig({
         Vue({
             template: { transformAssetUrls },
         }),
+        viteCommonjs(),
         // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
         Vuetify(),
         Components(),
@@ -28,7 +29,6 @@ export default defineConfig({
                 ],
             },
         }),
-        viteCommonjs(),
     ],
     optimizeDeps: {
         exclude: ['vuetify', '@cornerstonejs/dicom-image-loader'],

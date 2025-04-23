@@ -9,8 +9,8 @@
                 <v-divider />
 
                 <v-list density="compact" nav>
-                    <v-list-item prepend-icon="mdi-server" title="Dicom Server" :to="{ name: 'Dicom' }" />
                     <v-list-item prepend-icon="mdi-brain" title="AI" :to="{ name: 'AI' }" />
+                    <v-list-item prepend-icon="mdi-server" title="Dicom Server" :to="{ name: 'Dicom' }" />
                 </v-list>
             </v-navigation-drawer>
 

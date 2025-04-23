@@ -53,3 +53,5 @@ export const uploadToS3 = async (url: string, form: S3UploadForm, file: File): P
         return false
     }
 }
+
+export const parseDownloadUrl = (id: number) => `${BASE_URL}/dicom/${id}`

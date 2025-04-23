@@ -11,12 +11,16 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "@cornerstonejs/core": "^3.10.30",
+    "@cornerstonejs/dicom-image-loader": "^3.10.30",
+    "@cornerstonejs/tools": "^3.10.30",
     "@mdi/font": "7.4.47",
-    "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@vueuse/core": "^13.1.0",
+    "dayjs": "^1.11.13",
     "dicom-parser": "^1.8.21",
     "fflate": "^0.8.2",
     "roboto-fontface": "*",
+    "splitpanes": "^4.0.3",
     "typescript-eslint": "^8.30.1",
     "vue": "^3.5.13",
     "vue-router": "4",
@@ -24,6 +28,8 @@
     "vuetify": "^3.8.1"
   },
   "devDependencies": {
+    "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "@types/splitpanes": "^2.2.6",
     "@tsconfig/node22": "^22.0.0",
     "@types/node": "^22.9.0",
     "@vitejs/plugin-vue": "^5.2.3",

@@ -1,9 +1,9 @@
-import { TaskState } from '@/types/enums'
+import { TaskStatus } from '@/types/enums'
 
 export type Task = {
     id: number
     series: string
-    status: TaskState
+    status: TaskStatus
     result: string
     model: string
     order: number

@@ -14,7 +14,6 @@ from sybil.models.calibrator import SimpleClassifierGroup
 from sybil.utils.logging_utils import get_logger
 from sybil.utils.device_utils import get_default_device, get_most_free_gpu, get_device_mem_info
 
-
 # Leaving this here for a bit; these are IDs to download the models from Google Drive
 NAME_TO_FILE = {
     "sybil_base": {
@@ -66,7 +65,8 @@ NAME_TO_FILE = {
     },
 }
 
-CHECKPOINT_URL = os.getenv("SYBIL_CHECKPOINT_URL", "https://github.com/reginabarzilaygroup/Sybil/releases/download/v1.5.0/sybil_checkpoints.zip")
+CHECKPOINT_URL = os.getenv("SYBIL_CHECKPOINT_URL",
+                           "https://github.com/reginabarzilaygroup/Sybil/releases/download/v1.5.0/sybil_checkpoints.zip")
 
 
 class Prediction(NamedTuple):
@@ -133,11 +133,11 @@ def _torch_set_num_threads(threads) -> int:
 
 class Sybil:
     def __init__(
-        self,
-        name_or_path: Union[List[str], str] = "sybil_ensemble",
-        cache: str = "~/.sybil/",
-        calibrator_path: Optional[str] = None,
-        device: Optional[str] = None,
+            self,
+            name_or_path: Union[List[str], str] = "sybil_ensemble",
+            cache: str = "~/.sybil/",
+            calibrator_path: Optional[str] = None,
+            device: Optional[str] = None,
     ):
         """Initialize a trained Sybil model for inference.
 
@@ -246,10 +246,10 @@ class Sybil:
         return np.stack(calibrated_scores, axis=1)
 
     def _predict(
-        self,
-        model: SybilNet,
-        series: Union[Serie, List[Serie]],
-        return_attentions: bool = False,
+            self,
+            model: SybilNet,
+            series: Union[Serie, List[Serie]],
+            return_attentions: bool = False,
     ) -> Prediction:
         """Run predictions over the given serie(s).
 
@@ -305,7 +305,7 @@ class Sybil:
         return Prediction(scores=scores, attentions=attentions)
 
     def predict(
-        self, series: Union[Serie, List[Serie]], return_attentions: bool = False, threads=0,
+            self, series: Union[Serie, List[Serie]], return_attentions: bool = False, threads=0,
     ) -> Prediction:
         """Run predictions over the given serie(s) and ensemble
 
@@ -362,7 +362,7 @@ class Sybil:
         return Prediction(scores=calib_scores, attentions=attentions)
 
     def evaluate(
-        self, series: Union[Serie, List[Serie]], return_attentions: bool = False
+            self, series: Union[Serie, List[Serie]], return_attentions: bool = False
     ) -> Evaluation:
         """Run evaluation over the given serie(s).
 
@@ -434,7 +434,7 @@ class Sybil:
             return get_default_device()
 
         # Get size of the model in memory (approximate)
-        model_mem = 9*sum(p.numel() * p.element_size() for p in self.ensemble.parameters())
+        model_mem = 9 * sum(p.numel() * p.element_size() for p in self.ensemble.parameters())
 
         # Check memory available on current device.
         # If it seems like we're the only thing on this GPU, stay.

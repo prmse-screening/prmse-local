@@ -11,6 +11,7 @@ import (
 	"server/internal/services"
 	"server/internal/utils"
 	"strconv"
+	"strings"
 )
 
 type TasksHandler struct {
@@ -21,6 +22,26 @@ func NewTasksHandler(tasksService *services.TasksService) *TasksHandler {
 	return &TasksHandler{
 		tasksService: tasksService,
 	}
+}
+
+func (h *TasksHandler) GetTask(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	var resp responses.BaseResponse
+	if err != nil {
+		resp.ErrorResponse(c, http.StatusBadRequest, bizErr.ParseParamsErr.Error())
+		return
+	}
+
+	task, err := h.tasksService.GetTask(id)
+	if err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	data := responses.GetTaskResponse{}
+	_ = copier.Copy(&data, &task)
+	resp.SuccessResponse(c, http.StatusOK, data)
 }
 
 func (h *TasksHandler) CreateTask(c *gin.Context) {
@@ -34,13 +55,13 @@ func (h *TasksHandler) CreateTask(c *gin.Context) {
 	}
 
 	var resp responses.BaseResponse
-	err := h.tasksService.Create(&task)
+	newTask, err := h.tasksService.Create(&task)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	data := responses.CreateTaskResponse{}
-	_ = copier.Copy(&data, &task)
+	_ = copier.Copy(&data, &newTask)
 	resp.SuccessResponse(c, http.StatusOK, data)
 }
 
@@ -79,8 +100,11 @@ func (h *TasksHandler) PrioritizeTask(c *gin.Context) {
 func (h *TasksHandler) GetListPagination(c *gin.Context) {
 	pageParam := c.Query("page")
 	pageSizeParam := c.Query("pageSize")
-	status := c.Query("status")
-	series := c.Query("series")
+	status := strings.TrimSpace(c.Query("status"))
+	series := strings.TrimSpace(c.Query("series"))
+	sortKey := strings.TrimSpace(c.Query("sortKey"))
+	sortOrder := strings.ToLower(strings.TrimSpace(c.Query("sortOrder")))
+
 	var resp responses.BaseResponse
 	if pageParam == "" || pageSizeParam == "" {
 		resp.ErrorResponse(c, http.StatusBadRequest, bizErr.ParseParamsErr.Error())
@@ -88,7 +112,8 @@ func (h *TasksHandler) GetListPagination(c *gin.Context) {
 	}
 	page, _ := strconv.Atoi(pageParam)
 	pageSize, _ := strconv.Atoi(pageSizeParam)
-	tasks, total, err := h.tasksService.GetListPagination(page, pageSize, status, series)
+
+	tasks, total, err := h.tasksService.GetListPagination(page, pageSize, status, series, sortKey, sortOrder)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

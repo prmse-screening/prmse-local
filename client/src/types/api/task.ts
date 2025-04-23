@@ -1,4 +1,4 @@
-import { TaskState } from '@/types/enums'
+import { TaskStatus } from '@/types/enums'
 import type { Task } from '@/types'
 
 export type CreateTaskRequest = {
@@ -8,7 +8,7 @@ export type CreateTaskRequest = {
 export type UpdateTaskRequest = {
     id: number
     series: string
-    status: TaskState
+    status: TaskStatus
     result: string
     model: string
     order: number
@@ -16,6 +16,8 @@ export type UpdateTaskRequest = {
 }
 
 export type DeleteTaskRequest = UpdateTaskRequest
+
+export type GetTaskResponse = Task
 
 export type CreateTaskResponse = Task
 

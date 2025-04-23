@@ -29,6 +29,7 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 
 	tasks := engine.Group("/tasks")
 	{
+		tasks.GET("/:id", t.GetTask)
 		tasks.POST("/create", t.CreateTask)
 		tasks.POST("/update", t.UpdateTask)
 		tasks.POST("/prioritize", t.PrioritizeTask)
@@ -40,7 +41,7 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 
 	dicom := engine.Group("/dicom")
 	{
-		dicom.GET("/:series/:file", d.Redirect)
+		dicom.GET("/:id", d.GetUrl)
 	}
 
 	srv := &http.Server{

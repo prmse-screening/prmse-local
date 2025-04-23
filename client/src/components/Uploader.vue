@@ -1,145 +1,71 @@
 <template>
-    <v-card class="mx-auto" :loading="isUploading">
-        <div v-if="!isUploading">
-            <v-card-title class="text-h5">Select CT series</v-card-title>
-            <v-divider />
-            <v-card-item>
-                <div
-                    v-if="isProcessing"
-                    class="text-center d-flex flex-column align-center justify-center"
-                    style="height: 35vh"
-                >
-                    <v-progress-circular indeterminate size="70" color="primary" class="mb-4" />
-                    <span class="text-subtitle-1">Processing files...</span>
-                </div>
-                <div v-else class="text-center d-flex flex-column align-center justify-center" style="height: 35vh">
-                    <v-icon size="90" color="primary" class="mb-4" icon="mdi-cloud-upload" />
-                    <v-btn color="primary" size="large" variant="elevated" @click="open">Browse files</v-btn>
-                </div>
-            </v-card-item>
-        </div>
-        <div v-else>
-            <v-card-title class="text-h5">Uploading CT series</v-card-title>
-            <v-divider />
-            <v-card-item>
-                <v-virtual-scroll :items="groupedSeries" height="35vh">
-                    <template v-slot:default="{ item }">
-                        <v-list-item density="compact" :subtitle="`${item.files.length} files`" :title="item.series">
-                            <template v-slot:prepend>
-                                <v-icon>mdi-file</v-icon>
-                            </template>
-                            <template v-slot:append></template>
-                            <v-progress-linear
-                                :model-value="(item.index.value / item.files.length) * 100"
-                                color="success"
-                            />
-                        </v-list-item>
-                    </template>
-                </v-virtual-scroll>
-            </v-card-item>
-        </div>
+    <v-card :loading="isUploading">
+        <v-card-title class="text-h5">Select CT series</v-card-title>
+        <v-divider />
+        <v-card-item>
+            <div
+                v-if="isUploading"
+                class="text-center d-flex flex-column align-center justify-center"
+                style="min-height: 35vh"
+            >
+                <v-progress-circular indeterminate size="66" color="primary" class="mb-4" />
+                <span class="text-subtitle-1">Processing cases {{ curr }} / {{ entities.length }}...</span>
+            </div>
+            <div v-else class="text-center d-flex flex-column align-center justify-center" style="min-height: 35vh">
+                <v-icon size="90" color="primary" class="mb-4" icon="mdi-cloud-upload" />
+                <v-btn color="primary" size="large" variant="elevated" @click="open">Browse files</v-btn>
+            </div>
+        </v-card-item>
     </v-card>
 </template>
 
 <script setup lang="ts">
-import { type Ref, ref } from 'vue'
-import { getSeries } from '@/utils/dicom.ts'
+import { ref } from 'vue'
+import { compressFilesToZip, listLeafFolders, processDirectory } from '@/utils'
 import { createTask, getUploadUrl, updateTask } from '@/apis'
 import { uploadToS3 } from '@/apis/common.ts'
-import { TaskState } from '@/types'
-import { AsyncZipDeflate, Zip, zipSync } from 'fflate'
+import { TaskStatus } from '@/types'
 
-const curr = ref('')
-const isProcessing = ref(false)
+const curr = ref(0)
 const isUploading = ref(false)
 const emit = defineEmits<{ onUploaded: [] }>()
-let groupedSeries: { series: string; files: File[]; index: Ref<number> }[]
+const entities = ref<FileSystemDirectoryHandle[]>([])
 
 const open = async () => {
     try {
         //@ts-ignore FileSystem APIs
         const dirHandle = await window.showDirectoryPicker()
-        isProcessing.value = true
-        const groupedFiles: Record<string, File[]> = {}
-        await processDirectory(dirHandle, groupedFiles)
-        groupedSeries = Object.entries(groupedFiles).map(([series, files]) => ({
-            series,
-            files,
-            index: ref(0),
-        }))
-        isProcessing.value = false
+        entities.value = await listLeafFolders(dirHandle)
         isUploading.value = true
         await upload()
     } catch (error) {
         console.error(error)
-        isProcessing.value = false
-    }
-}
-
-async function processDirectory(dirHandle: FileSystemDirectoryHandle, groupedFiles: Record<string, File[]>) {
-    //@ts-ignore FileSystem APIs
-    for await (const entry of dirHandle.values()) {
-        if (entry.kind === 'file') {
-            const file = await entry.getFile()
-            const series = await getSeries(file)
-            if (series) {
-                if (!groupedFiles[series]) {
-                    groupedFiles[series] = []
-                }
-                groupedFiles[series].push(file)
-            }
-        } else if (entry.kind === 'directory') {
-            await processDirectory(entry, groupedFiles)
-        }
     }
 }
 
 const upload = async () => {
-    for (let i = 0; i < groupedSeries.length; i++) {
-        const group = groupedSeries[i]
-        curr.value = group.series
+    isUploading.value = true
+    for (const entity of entities.value) {
+        try {
+            const { files, series } = await processDirectory(entity)
+            if (!series) continue
 
-        const task = await createTask({ series: group.series })
-        if (!task) continue
+            const task = await createTask({ series })
+            if (!task) continue
 
-        const uploadInfo = await getUploadUrl({ series: group.series })
-        if (!uploadInfo) continue
+            const uploadInfo = await getUploadUrl({ series })
+            if (!uploadInfo) continue
 
-        const chunks: Uint8Array[] = []
-        const zip = new Zip()
-
-        zip.ondata = async (err, chunk, final) => {
-            if (err) {
-                console.error('Error during compression:', err)
-                return
-            }
-
-            chunks.push(chunk)
-
-            if (final) {
-                const zipBlob = new Blob(chunks, { type: 'application/zip' })
-                const zipFile = new File([zipBlob], 'c.zip', {
-                    type: 'application/zip',
-                    lastModified: new Date().getTime(),
-                })
-                await uploadToS3(uploadInfo.url, uploadInfo.form, zipFile)
-                task.status = TaskState.Pending
-                await updateTask(task)
-                emit('onUploaded')
-                console.log(final)
-            }
+            const file = await compressFilesToZip(files)
+            await uploadToS3(uploadInfo.url, uploadInfo.form, file)
+            task.status = TaskStatus.Pending
+            await updateTask(task)
+            curr.value++
+        } catch (e) {
+            console.error(e)
         }
-
-        for (const file of group.files) {
-            const arrayBuffer = await file.arrayBuffer()
-            const fileData = new Uint8Array(arrayBuffer)
-            const fileEntry = new AsyncZipDeflate(file.name)
-            zip.add(fileEntry)
-            fileEntry.push(fileData, true)
-            group.index.value++
-        }
-        zip.end()
     }
+    emit('onUploaded')
     isUploading.value = false
 }
 </script>

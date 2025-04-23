@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Worker_Inference_FullMethodName = "/rpc.Worker/Inference"
+	Worker_Infer_FullMethodName = "/rpc.Worker/Infer"
 )
 
 // WorkerClient is the client API for Worker service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkerClient interface {
-	Inference(ctx context.Context, in *InferenceRequest, opts ...grpc.CallOption) (*InferenceResponse, error)
+	Infer(ctx context.Context, in *InferenceRequest, opts ...grpc.CallOption) (*InferenceResponse, error)
 }
 
 type workerClient struct {
@@ -37,10 +37,10 @@ func NewWorkerClient(cc grpc.ClientConnInterface) WorkerClient {
 	return &workerClient{cc}
 }
 
-func (c *workerClient) Inference(ctx context.Context, in *InferenceRequest, opts ...grpc.CallOption) (*InferenceResponse, error) {
+func (c *workerClient) Infer(ctx context.Context, in *InferenceRequest, opts ...grpc.CallOption) (*InferenceResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(InferenceResponse)
-	err := c.cc.Invoke(ctx, Worker_Inference_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Worker_Infer_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *workerClient) Inference(ctx context.Context, in *InferenceRequest, opts
 // All implementations must embed UnimplementedWorkerServer
 // for forward compatibility.
 type WorkerServer interface {
-	Inference(context.Context, *InferenceRequest) (*InferenceResponse, error)
+	Infer(context.Context, *InferenceRequest) (*InferenceResponse, error)
 	mustEmbedUnimplementedWorkerServer()
 }
 
@@ -62,8 +62,8 @@ type WorkerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedWorkerServer struct{}
 
-func (UnimplementedWorkerServer) Inference(context.Context, *InferenceRequest) (*InferenceResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Inference not implemented")
+func (UnimplementedWorkerServer) Infer(context.Context, *InferenceRequest) (*InferenceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Infer not implemented")
 }
 func (UnimplementedWorkerServer) mustEmbedUnimplementedWorkerServer() {}
 func (UnimplementedWorkerServer) testEmbeddedByValue()                {}
@@ -86,20 +86,20 @@ func RegisterWorkerServer(s grpc.ServiceRegistrar, srv WorkerServer) {
 	s.RegisterService(&Worker_ServiceDesc, srv)
 }
 
-func _Worker_Inference_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Worker_Infer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(InferenceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WorkerServer).Inference(ctx, in)
+		return srv.(WorkerServer).Infer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Worker_Inference_FullMethodName,
+		FullMethod: Worker_Infer_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkerServer).Inference(ctx, req.(*InferenceRequest))
+		return srv.(WorkerServer).Infer(ctx, req.(*InferenceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +112,8 @@ var Worker_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*WorkerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Inference",
-			Handler:    _Worker_Inference_Handler,
+			MethodName: "Infer",
+			Handler:    _Worker_Infer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

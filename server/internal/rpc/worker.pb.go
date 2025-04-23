@@ -24,8 +24,9 @@ const (
 type InferenceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Series        string                 `protobuf:"bytes,1,opt,name=series,proto3" json:"series,omitempty"`
-	Paths         []string               `protobuf:"bytes,2,rep,name=paths,proto3" json:"paths,omitempty"`
+	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
 	Model         string                 `protobuf:"bytes,3,opt,name=model,proto3" json:"model,omitempty"`
+	Cpu           bool                   `protobuf:"varint,4,opt,name=cpu,proto3" json:"cpu,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -67,11 +68,11 @@ func (x *InferenceRequest) GetSeries() string {
 	return ""
 }
 
-func (x *InferenceRequest) GetPaths() []string {
+func (x *InferenceRequest) GetPath() string {
 	if x != nil {
-		return x.Paths
+		return x.Path
 	}
-	return nil
+	return ""
 }
 
 func (x *InferenceRequest) GetModel() string {
@@ -79,6 +80,13 @@ func (x *InferenceRequest) GetModel() string {
 		return x.Model
 	}
 	return ""
+}
+
+func (x *InferenceRequest) GetCpu() bool {
+	if x != nil {
+		return x.Cpu
+	}
+	return false
 }
 
 type InferenceResponse struct {
@@ -137,16 +145,17 @@ var File_worker_proto protoreflect.FileDescriptor
 
 const file_worker_proto_rawDesc = "" +
 	"\n" +
-	"\fworker.proto\x12\x03rpc\"V\n" +
+	"\fworker.proto\x12\x03rpc\"f\n" +
 	"\x10InferenceRequest\x12\x16\n" +
-	"\x06series\x18\x01 \x01(\tR\x06series\x12\x14\n" +
-	"\x05paths\x18\x02 \x03(\tR\x05paths\x12\x14\n" +
-	"\x05model\x18\x03 \x01(\tR\x05model\"C\n" +
+	"\x06series\x18\x01 \x01(\tR\x06series\x12\x12\n" +
+	"\x04path\x18\x02 \x01(\tR\x04path\x12\x14\n" +
+	"\x05model\x18\x03 \x01(\tR\x05model\x12\x10\n" +
+	"\x03cpu\x18\x04 \x01(\bR\x03cpu\"C\n" +
 	"\x11InferenceResponse\x12\x16\n" +
 	"\x06series\x18\x01 \x01(\tR\x06series\x12\x16\n" +
-	"\x06result\x18\x02 \x01(\tR\x06result2F\n" +
-	"\x06Worker\x12<\n" +
-	"\tInference\x12\x15.rpc.InferenceRequest\x1a\x16.rpc.InferenceResponse\"\x00B\bZ\x06./;rpcb\x06proto3"
+	"\x06result\x18\x02 \x01(\tR\x06result2B\n" +
+	"\x06Worker\x128\n" +
+	"\x05Infer\x12\x15.rpc.InferenceRequest\x1a\x16.rpc.InferenceResponse\"\x00B\bZ\x06./;rpcb\x06proto3"
 
 var (
 	file_worker_proto_rawDescOnce sync.Once
@@ -166,8 +175,8 @@ var file_worker_proto_goTypes = []any{
 	(*InferenceResponse)(nil), // 1: rpc.InferenceResponse
 }
 var file_worker_proto_depIdxs = []int32{
-	0, // 0: rpc.Worker.Inference:input_type -> rpc.InferenceRequest
-	1, // 1: rpc.Worker.Inference:output_type -> rpc.InferenceResponse
+	0, // 0: rpc.Worker.Infer:input_type -> rpc.InferenceRequest
+	1, // 1: rpc.Worker.Infer:output_type -> rpc.InferenceResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

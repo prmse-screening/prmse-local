@@ -2,8 +2,11 @@ package db
 
 import (
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"server/internal/models/entities"
 )
+
+var allowedSortKeys = map[string]bool{"order": true, "updated": true}
 
 type TasksRepo struct {
 	db *gorm.DB
@@ -43,31 +46,33 @@ func (r *TasksRepo) Delete(task *entities.Task) error {
 	return r.db.Delete(task).Error
 }
 
-func (r *TasksRepo) ListWithPagination(page, pageSize int, status, series string) ([]*entities.Task, int64, error) {
+func (r *TasksRepo) ListWithPagination(page, pageSize int, status, series, sortKey, sortOrder string) ([]*entities.Task, int64, error) {
 	var tasks []*entities.Task
 	var total int64
 
-	query := r.db
+	query := r.db.Model(&entities.Task{})
 
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-
 	if series != "" {
 		query = query.Where("series LIKE ?", series+"%")
 	}
 
-	err := query.Model(&entities.Task{}).Count(&total).Error
-	if err != nil {
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err = query.Order("\"order\"").
-		Limit(pageSize).
-		Offset((page - 1) * pageSize).
-		Find(&tasks).Error
+	if allowedSortKeys[sortKey] {
+		orderClause := clause.OrderByColumn{Column: clause.Column{Name: sortKey}, Desc: sortOrder == "desc"}
+		query = query.Order(orderClause)
+	}
 
-	if err != nil {
+	if page < 1 {
+		page = 1
+	}
+	offset := (page - 1) * pageSize
+	if err := query.Limit(pageSize).Offset(offset).Find(&tasks).Error; err != nil {
 		return nil, 0, err
 	}
 

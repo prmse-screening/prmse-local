@@ -11,10 +11,11 @@ const routes = [
         children: [
             {
                 path: '',
-                redirect: 'dicom',
+                name: 'Home',
+                redirect: { name: 'AI' },
             },
             {
-                path: '/dicom',
+                path: 'dicom',
                 name: 'Dicom',
                 component: () => import('@/views/Dicom.vue'),
             },
@@ -25,6 +26,11 @@ const routes = [
             },
         ],
     },
+    {
+        path: '/viewer/:id',
+        name: 'Viewer',
+        component: () => import('@/views/DicomViewer.vue'),
+    }
 ]
 
 const router = createRouter({

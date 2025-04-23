@@ -8,7 +8,9 @@ var (
 
 // task error
 var (
-	RetrieveNextTaskErr = errors.New("retrieve next task failed")
+	RetrieveNextTaskErr = errors.New("RetrieveNextTaskErr")
+	InferenceErr        = errors.New("inference failed")
+	GetTaskErr          = errors.New("get task failed")
 	CreateTaskErr       = errors.New("create task failed, task may already exist")
 	UpdateTaskErr       = errors.New("update task failed")
 	DeleteTaskErr       = errors.New("delete task failed")

@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"context"
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"server/internal/commons/bizErr"
 	"server/internal/commons/enums"
@@ -16,44 +17,48 @@ import (
 
 type TasksScheduler struct {
 	tasksRepo       *db.TasksRepo
-	workers         *[]rpc.WorkerClient
 	minioRepo       *storage.MiniRepo
-	workerSem       chan struct{}
+	workers         *[]rpc.WorkerClient
+	semaphore       chan int
 	ctx             context.Context
 	cancelFunc      context.CancelFunc
 	nextWorkerIndex uint64
 }
 
 func NewTasksScheduler(tasksRepo *db.TasksRepo, workers *[]rpc.WorkerClient, minioRepo *storage.MiniRepo) *TasksScheduler {
+	nums := len(*workers)
+	semaphore := make(chan int, nums)
+	for i := 0; i < nums; i++ {
+		semaphore <- i
+	}
+	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &TasksScheduler{
 		tasksRepo:       tasksRepo,
-		workers:         workers,
 		minioRepo:       minioRepo,
-		workerSem:       make(chan struct{}, len(*workers)),
-		ctx:             nil,
-		cancelFunc:      nil,
+		workers:         workers,
+		semaphore:       semaphore,
+		ctx:             ctx,
+		cancelFunc:      cancelFunc,
 		nextWorkerIndex: 0,
 	}
 }
 
-func (s *TasksScheduler) processNextTask() {
+func (s *TasksScheduler) processNextTask(id int) {
 	defer func() {
-		s.workerSem <- struct{}{}
+		s.semaphore <- id
 	}()
-	if err := s.handleNextTask(); err != nil {
-		log.Errorf("%v", err)
-		time.Sleep(5 * time.Second)
+	if err := s.handleNextTask(id); err != nil {
+		if !errors.Is(err, bizErr.RetrieveNextTaskErr) {
+			log.Errorf("%v", err)
+		}
+		time.Sleep(6 * time.Second)
 	}
 }
 
-func (s *TasksScheduler) handleNextTask() error {
+func (s *TasksScheduler) handleNextTask(id int) error {
 	task, err := s.tasksRepo.NextTask()
 	if err != nil {
 		return bizErr.RetrieveNextTaskErr
-	}
-
-	if task == nil {
-		return nil
 	}
 
 	task.Status = enums.Processing
@@ -61,27 +66,29 @@ func (s *TasksScheduler) handleNextTask() error {
 		return bizErr.UpdateTaskErr
 	}
 
-	worker := s.selectWorker()
+	worker := (*s.workers)[id]
 	//reqCtx, cancel := context.WithTimeout(s.ctx, time.Hour)
 	//defer cancel()
 
-	folder := strconv.FormatInt(task.ID, 10)
-	urls, err := s.minioRepo.GetPresignedDownloadUrls(s.ctx, folder, time.Hour)
+	url, err := s.minioRepo.GetPresignedDownloadURL(s.ctx, strconv.FormatInt(task.ID, 10), time.Hour)
 	if err != nil {
 		return bizErr.GetDownloadUrlsErr
 	}
-	resp, err := worker.Inference(s.ctx, &rpc.InferenceRequest{
+	resp, err := worker.Infer(s.ctx, &rpc.InferenceRequest{
 		Model:  task.Model,
-		Paths:  urls,
+		Path:   url,
 		Series: task.Series,
+		Cpu:    config.Cfg.Worker.Cpu,
 	})
 
 	if err != nil {
 		task.Status = enums.Failed
-	} else {
-		task.Status = enums.Completed
-		task.Result = resp.Result
+		_ = s.tasksRepo.Update(task)
+		return err
 	}
+
+	task.Status = enums.Completed
+	task.Result = resp.Result
 
 	if err = s.tasksRepo.Update(task); err != nil {
 		return bizErr.UpdateTaskErr
@@ -99,19 +106,15 @@ func (s *TasksScheduler) selectWorker() rpc.WorkerClient {
 func (s *TasksScheduler) Start() {
 	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
 
-	for i := 0; i < len(config.Cfg.Worker.Endpoints); i++ {
-		s.workerSem <- struct{}{}
-	}
-
 	for {
 		select {
 		case <-s.ctx.Done():
 			return
-		case _, ok := <-s.workerSem:
+		case i, ok := <-s.semaphore:
 			if !ok {
 				return
 			}
-			go s.processNextTask()
+			go s.processNextTask(i)
 		}
 	}
 }

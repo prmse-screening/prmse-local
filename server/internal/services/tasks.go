@@ -4,6 +4,7 @@ import (
 	"context"
 	log "github.com/sirupsen/logrus"
 	"server/internal/commons/bizErr"
+	"server/internal/commons/enums"
 	"server/internal/config"
 	"server/internal/data/db"
 	"server/internal/data/storage"
@@ -24,13 +25,29 @@ func NewTasksService(tasksRepo *db.TasksRepo, miniRepo *storage.MiniRepo) *Tasks
 	}
 }
 
-func (s *TasksService) Create(task *entities.Task) error {
+func (s *TasksService) GetTask(id int64) (*entities.Task, error) {
+	task, err := s.tasksRepo.GetTask(id)
+	if err != nil {
+		log.Errorf("get task failed, id [%d], error [%v]", id, err)
+		return nil, bizErr.GetTaskErr
+	}
+	return task, nil
+}
+
+func (s *TasksService) Create(task *entities.Task) (*entities.Task, error) {
 	err := s.tasksRepo.Create(task)
 	if err != nil {
-		log.Errorf("create task failed, series [%s]", task.Series)
-		return bizErr.CreateTaskErr
+		log.Errorf("create task failed, series [%s]: %v", task.Series, err)
+
+		existing, findErr := s.tasksRepo.GetBySeries(task.Series)
+		if findErr == nil && existing.Status == enums.Preparing {
+			return existing, nil
+		}
+
+		return nil, bizErr.CreateTaskErr
 	}
-	return nil
+
+	return task, nil
 }
 
 func (s *TasksService) Update(task *entities.Task) error {
@@ -72,8 +89,8 @@ func (s *TasksService) GetUploadUrl(series string) (string, map[string]string, e
 	return url, form, nil
 }
 
-func (s *TasksService) GetListPagination(page, pageSize int, series, status string) ([]*entities.Task, int64, error) {
-	tasks, total, err := s.tasksRepo.ListWithPagination(page, pageSize, series, status)
+func (s *TasksService) GetListPagination(page, pageSize int, series, status, sortKey, sortOrder string) ([]*entities.Task, int64, error) {
+	tasks, total, err := s.tasksRepo.ListWithPagination(page, pageSize, series, status, sortKey, sortOrder)
 	if err != nil {
 		return nil, 0, bizErr.GetTasksErr
 	}
