@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { compressFilesToZip, listLeafFolders, processDirectory } from '@/utils'
-import { createTask, getUploadUrl, updateTask } from '@/apis'
+import { createTask, getUploadPostUrl, updateTask } from '@/apis'
 import { uploadToS3 } from '@/apis/common.ts'
 import { TaskStatus } from '@/types'
 
@@ -53,7 +53,7 @@ const upload = async () => {
             const task = await createTask({ series })
             if (!task) continue
 
-            const uploadInfo = await getUploadUrl({ series })
+            const uploadInfo = await getUploadPostUrl({ series })
             if (!uploadInfo) continue
 
             const file = await compressFilesToZip(files)

@@ -45,9 +45,9 @@ export const deleteTask = (data: DeleteTaskRequest) => {
     })
 }
 
-export const getUploadUrl = (params: { series: string }) => {
+export const getUploadPostUrl = (params: { series: string }) => {
     const query = new URLSearchParams(params).toString()
-    return http<GetUploadUrlResponse>(`/tasks/upload?${query}`)
+    return http<GetUploadUrlResponse>(`/tasks/uploadPost?${query}`)
 }
 
 export const getTaskList = ({

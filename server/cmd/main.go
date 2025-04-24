@@ -26,6 +26,10 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 
 	api := engine.Group("/api")
 	{
+		api.GET("/ping", func(c *gin.Context) {
+			c.JSON(200, "pong")
+		})
+
 		tasks := api.Group("/tasks")
 		{
 			tasks.GET("/:id", t.GetTask)
@@ -34,7 +38,7 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 			tasks.POST("/prioritize", t.PrioritizeTask)
 			tasks.POST("/delete", t.DeleteTask)
 			tasks.POST("/device", t.SetWorkerDevice)
-			tasks.GET("/upload", t.GetUploadUrl)
+			tasks.GET("/uploadPost", t.GetUploadPostUrl)
 			tasks.GET("/list", t.GetListPagination)
 			tasks.GET("/export", t.ExportTasks)
 		}
@@ -44,7 +48,7 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 			dicom.GET("/:id", d.GetUrl)
 		}
 	}
-ect
+
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Cfg.App.Port),
 		Handler: engine,
@@ -59,19 +63,6 @@ ect
 	ts.Start()
 	c.StartCSVFileCleaner()
 	return srv
-}
-
-func staticServe(urlPrefix, root string) gin.HandlerFunc {
-	fs := http.FileServer(http.Dir(root))
-	return func(c *gin.Context) {
-		// 只处理 GET 请求
-		if c.Request.Method != http.MethodGet {
-			c.Next()
-			return
-		}
-		fs.ServeHTTP(c.Writer, c.Request)
-		c.Abort()
-	}
 }
 
 func main() {

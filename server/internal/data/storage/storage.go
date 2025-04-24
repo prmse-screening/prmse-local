@@ -60,6 +60,15 @@ func (r *MiniRepo) GetPresignedPostFolderUploadURL(ctx context.Context, folderPa
 	return postUrl.String(), formData, err
 }
 
+// GetPresignedPutObjectURL Get presigned put object URL, which can be used to upload the file
+func (r *MiniRepo) GetPresignedPutObjectURL(ctx context.Context, objectName string, expiry time.Duration) (string, error) {
+	presignedURL, err := r.client.PresignedPutObject(ctx, r.bucketName, objectName, expiry)
+	if err != nil {
+		return "", err
+	}
+	return presignedURL.String(), nil
+}
+
 // DeleteFolder Delete folder
 func (r *MiniRepo) DeleteFolder(ctx context.Context, folderPath string) error {
 	if !strings.HasSuffix(folderPath, "/") {

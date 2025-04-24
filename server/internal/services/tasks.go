@@ -144,7 +144,7 @@ func (s *TasksService) Delete(task *entities.Task) error {
 	return nil
 }
 
-func (s *TasksService) GetUploadUrl(series string) (string, map[string]string, error) {
+func (s *TasksService) GetUploadPostUrl(series string) (string, map[string]string, error) {
 	task, err := s.tasksRepo.GetBySeries(series)
 	if err != nil {
 		log.Errorf("get task failed, series [%s], error [%v]", series, err)

@@ -154,14 +154,14 @@ func (h *TasksHandler) DeleteTask(c *gin.Context) {
 	resp.SuccessResponse(c, http.StatusOK, "success")
 }
 
-func (h *TasksHandler) GetUploadUrl(c *gin.Context) {
+func (h *TasksHandler) GetUploadPostUrl(c *gin.Context) {
 	series := c.Query("series")
 	var resp responses.BaseResponse
 	if series == "" {
 		resp.ErrorResponse(c, http.StatusBadRequest, bizErr.ParseParamsErr)
 		return
 	}
-	url, form, err := h.tasksService.GetUploadUrl(series)
+	url, form, err := h.tasksService.GetUploadPostUrl(series)
 	if err != nil {
 		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
