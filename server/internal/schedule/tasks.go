@@ -106,17 +106,19 @@ func (s *TasksScheduler) selectWorker() rpc.WorkerClient {
 func (s *TasksScheduler) Start() {
 	s.ctx, s.cancelFunc = context.WithCancel(context.Background())
 
-	for {
-		select {
-		case <-s.ctx.Done():
-			return
-		case i, ok := <-s.semaphore:
-			if !ok {
+	go func() {
+		for {
+			select {
+			case <-s.ctx.Done():
 				return
+			case i, ok := <-s.semaphore:
+				if !ok {
+					return
+				}
+				go s.processNextTask(i)
 			}
-			go s.processNextTask(i)
 		}
-	}
+	}()
 }
 
 func (s *TasksScheduler) Stop() {

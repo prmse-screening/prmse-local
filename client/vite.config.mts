@@ -4,6 +4,7 @@ import Vue from '@vitejs/plugin-vue'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import ViteFonts from 'unplugin-fonts/vite'
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
+// import { visualizer } from 'rollup-plugin-visualizer'
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -30,6 +31,7 @@ export default defineConfig({
             },
         }),
     ],
+    base: './',
     optimizeDeps: {
         exclude: ['vuetify', '@cornerstonejs/dicom-image-loader'],
         include: ['dicom-parser'],

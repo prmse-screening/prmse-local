@@ -34,8 +34,8 @@ class WorkerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Inference = channel.unary_unary(
-                '/rpc.Worker/Inference',
+        self.Infer = channel.unary_unary(
+                '/rpc.Worker/Infer',
                 request_serializer=worker__pb2.InferenceRequest.SerializeToString,
                 response_deserializer=worker__pb2.InferenceResponse.FromString,
                 _registered_method=True)
@@ -44,7 +44,7 @@ class WorkerStub(object):
 class WorkerServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def Inference(self, request, context):
+    def Infer(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,8 +53,8 @@ class WorkerServicer(object):
 
 def add_WorkerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Inference': grpc.unary_unary_rpc_method_handler(
-                    servicer.Inference,
+            'Infer': grpc.unary_unary_rpc_method_handler(
+                    servicer.Infer,
                     request_deserializer=worker__pb2.InferenceRequest.FromString,
                     response_serializer=worker__pb2.InferenceResponse.SerializeToString,
             ),
@@ -70,7 +70,7 @@ class Worker(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Inference(request,
+    def Infer(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,7 +83,7 @@ class Worker(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/rpc.Worker/Inference',
+            '/rpc.Worker/Infer',
             worker__pb2.InferenceRequest.SerializeToString,
             worker__pb2.InferenceResponse.FromString,
             options,

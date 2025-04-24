@@ -19,31 +19,32 @@ import (
 	"time"
 )
 
-func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.TasksScheduler) *http.Server {
+func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.TasksScheduler, c *schedule.TasksCleaner) *http.Server {
 	//gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	engine.Use(gin.Recovery(), middlewares.Logger(), cors.Default())
-	engine.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, "pong")
-	})
 
-	tasks := engine.Group("/tasks")
+	api := engine.Group("/api")
 	{
-		tasks.GET("/:id", t.GetTask)
-		tasks.POST("/create", t.CreateTask)
-		tasks.POST("/update", t.UpdateTask)
-		tasks.POST("/prioritize", t.PrioritizeTask)
-		tasks.POST("/delete", t.DeleteTask)
-		tasks.POST("/device", t.SetWorkerDevice)
-		tasks.GET("/upload", t.GetUploadUrl)
-		tasks.GET("/list", t.GetListPagination)
-	}
+		tasks := api.Group("/tasks")
+		{
+			tasks.GET("/:id", t.GetTask)
+			tasks.POST("/create", t.CreateTask)
+			tasks.POST("/update", t.UpdateTask)
+			tasks.POST("/prioritize", t.PrioritizeTask)
+			tasks.POST("/delete", t.DeleteTask)
+			tasks.POST("/device", t.SetWorkerDevice)
+			tasks.GET("/upload", t.GetUploadUrl)
+			tasks.GET("/list", t.GetListPagination)
+			tasks.GET("/export", t.ExportTasks)
+		}
 
-	dicom := engine.Group("/dicom")
-	{
-		dicom.GET("/:id", d.GetUrl)
+		dicom := api.Group("/dicom")
+		{
+			dicom.GET("/:id", d.GetUrl)
+		}
 	}
-
+ect
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Cfg.App.Port),
 		Handler: engine,
@@ -55,8 +56,22 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 		}
 	}()
 
-	//go ts.Start()
+	ts.Start()
+	c.StartCSVFileCleaner()
 	return srv
+}
+
+func staticServe(urlPrefix, root string) gin.HandlerFunc {
+	fs := http.FileServer(http.Dir(root))
+	return func(c *gin.Context) {
+		// 只处理 GET 请求
+		if c.Request.Method != http.MethodGet {
+			c.Next()
+			return
+		}
+		fs.ServeHTTP(c.Writer, c.Request)
+		c.Abort()
+	}
 }
 
 func main() {

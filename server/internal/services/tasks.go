@@ -2,7 +2,11 @@ package services
 
 import (
 	"context"
+	"encoding/csv"
+	"fmt"
 	log "github.com/sirupsen/logrus"
+	"os"
+	"path"
 	"server/internal/commons/bizErr"
 	"server/internal/commons/enums"
 	"server/internal/config"
@@ -32,6 +36,72 @@ func (s *TasksService) GetTask(id int64) (*entities.Task, error) {
 		return nil, bizErr.GetTaskErr
 	}
 	return task, nil
+}
+
+func (s *TasksService) ExportTasks(series, status string) (string, error) {
+	rows, err := s.tasksRepo.GetCursor(series, status)
+	if err != nil {
+		log.Errorf("get next tasks failed, error [%v]", err)
+		return "", bizErr.GetTasksErr
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	filename := fmt.Sprintf("tasks_export_%s.csv", time.Now().String())
+	filePath := path.Join("exports", filename)
+
+	if err = os.MkdirAll("exports", os.ModePerm); err != nil {
+		log.Errorf("failed to create exports directory: %v", err)
+		return "", err
+	}
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		log.Errorf("failed to create csv file: %v", err)
+		return "", err
+	}
+	writer := csv.NewWriter(file)
+	defer func() {
+		_ = file.Close()
+	}()
+	defer writer.Flush()
+
+	err = writer.Write([]string{"ID", "Series", "Status", "Result", "Model", "Order", "Updated"})
+	if err != nil {
+		log.Errorf("failed to write header to csv: %v", err)
+		return "", err
+	}
+
+	for rows.Next() {
+		var task entities.Task
+		if err = rows.Scan(
+			&task.ID,
+			&task.Series,
+			&task.Status,
+			&task.Result,
+			&task.Model,
+			&task.Order,
+			&task.Updated,
+		); err != nil {
+			log.Errorf("scan task failed: %v", err)
+			continue
+		}
+		err = writer.Write([]string{
+			fmt.Sprintf("%d", task.ID),
+			task.Series,
+			task.Status.String(),
+			task.Result,
+			task.Model,
+			fmt.Sprintf("%d", task.Order),
+			task.Updated.Format(time.RFC3339),
+		})
+		if err != nil {
+			log.Errorf("failed to write task to csv: %v", err)
+			return "", err
+		}
+	}
+	return filePath, nil
 }
 
 func (s *TasksService) Create(task *entities.Task) (*entities.Task, error) {

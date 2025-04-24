@@ -1,8 +1,9 @@
 import json
-import logging
 import os
+import random
 import shutil
 import tempfile
+import time
 import zipfile
 import grpc
 import asyncio
@@ -36,19 +37,23 @@ def process(path: str) -> list[float] | None:
                     paths.append(file_path)
 
             paths.sort()
-            predictions = model.predict(series=Serie(paths))
-            return predictions.scores[0]
+            # predictions = model.predict(series=Serie(paths))
+            time.sleep(6)
+            # return predictions.scores[0]
+            return [random.random() for _ in range(6)]
     finally:
+        print(tmp_dir)
         shutil.rmtree(tmp_dir)
 
 
 class WorkerServicer(worker_pb2_grpc.WorkerServicer):
-    async def Inference(self, request, context):
+    async def Infer(self, request, context):
         if request.cpu:
             model.to(device='cpu')
         else:
             model.to(device=get_default_device())
 
+        print("Inference request received")
         prediction = process(request.path)
         res = {
             "prediction": prediction,

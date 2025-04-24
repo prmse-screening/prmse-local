@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"server/internal/services"
+	"strconv"
 )
 
 type DicomHandler struct {
@@ -16,10 +17,13 @@ func NewDicomHandler(dicomService *services.DicomService) *DicomHandler {
 	}
 }
 
-func (h *DicomHandler) Redirect(c *gin.Context) {
-	series := c.Param("series")
-	file := c.Param("file")
-	url, err := h.dicomService.Redirect(series, file)
+func (h *DicomHandler) GetUrl(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return
+	}
+	url, err := h.dicomService.GetUrl(id)
 	if err != nil {
 		return
 	}

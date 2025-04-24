@@ -82,7 +82,3 @@ export const setWorkerDevice = (params: { device: string }) => {
     const query = new URLSearchParams(params).toString()
     return http<string>(`/tasks/device?${query}`)
 }
-
-export const getTaskUrl = (id: string) => {
-    return `/dicom/${id}`
-}

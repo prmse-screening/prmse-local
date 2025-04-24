@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"server/internal/models/entities"
@@ -44,6 +45,21 @@ func (r *TasksRepo) Update(task *entities.Task) error {
 
 func (r *TasksRepo) Delete(task *entities.Task) error {
 	return r.db.Delete(task).Error
+}
+
+func (r *TasksRepo) GetCursor(series, status string) (*sql.Rows, error) {
+	query := r.db.Model(&entities.Task{})
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	if series != "" {
+		query = query.Where("series LIKE ?", series+"%")
+	}
+	row, err := query.Rows()
+	if err != nil {
+		return nil, err
+	}
+	return row, nil
 }
 
 func (r *TasksRepo) ListWithPagination(page, pageSize int, status, series, sortKey, sortOrder string) ([]*entities.Task, int64, error) {

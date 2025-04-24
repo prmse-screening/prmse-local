@@ -1,5 +1,5 @@
 import * as dicomParser from 'dicom-parser'
-import { AsyncZipDeflate, Unzip, UnzipInflate, Zip, zip } from 'fflate'
+import { AsyncZipDeflate, Unzip, UnzipInflate, Zip } from 'fflate'
 import { wadouri } from '@cornerstonejs/dicom-image-loader'
 import { parseDownloadUrl } from '@/apis/common.ts'
 

@@ -1,12 +1,23 @@
 <template>
     <v-card class="mx-auto">
         <v-card-title>
+            <v-icon icon="mdi-list-box-outline" class="mr-2" />
+            <span class="text-h6">Tasks</span>
+        </v-card-title>
+        <v-card-item>
             <v-row class="align-center justify-space-between" no-gutters>
-                <v-col cols="12" md="3" class="d-flex align-center mb-2 mb-md-0">
-                    <v-icon icon="mdi-list-box-outline" class="mr-2" />
-                    <span class="text-h6">Tasks</span>
+                <v-col cols="12" md="2" class="d-flex align-center mb-2 mb-md-0">
+                    <v-btn
+                        prepend-icon="mdi-export-variant"
+                        style="width: 100%"
+                        color="primary"
+                        variant="tonal"
+                        @click="exportData"
+                    >
+                        Export
+                    </v-btn>
                 </v-col>
-                <v-col cols="12" md="4" class="mb-2 mb-md-0">
+                <v-col cols="12" md="6" class="mb-2 mb-md-0">
                     <v-text-field
                         v-model="series"
                         density="compact"
@@ -37,8 +48,7 @@
                     />
                 </v-col>
             </v-row>
-        </v-card-title>
-
+        </v-card-item>
         <v-data-table-server
             v-model:items-per-page="itemsPerPage"
             :headers="headers"
@@ -59,8 +69,14 @@
 
             <template v-slot:item.actions="{ item }">
                 <div class="d-flex ga-2">
-                    <v-icon color="medium-emphasis" icon="mdi-image-multiple" size="small" @click="viewItem(item.id)" />
-                    <v-menu>
+                    <v-icon
+                        color="medium-emphasis"
+                        icon="mdi-image-multiple"
+                        size="small"
+                        @click="viewItem(item.id)"
+                        :disabled="item.status === 0"
+                    />
+                    <v-menu :disabled="item.status === 2">
                         <template v-slot:activator="{ props }">
                             <v-icon v-bind="props" color="medium-emphasis" icon="mdi-dots-vertical" size="small" />
                         </template>
@@ -114,6 +130,7 @@ import dayjs from 'dayjs'
 import { VDataTableServer } from 'vuetify/components'
 import { watchDebounced } from '@vueuse/core'
 import { useRouter } from 'vue-router'
+import { parseExportUrl } from '@/apis/common.ts'
 
 const router = useRouter()
 const itemsPerPage = ref(10)
@@ -152,6 +169,16 @@ const prioritizeItem = async (item: UpdateTaskRequest) => {
     if (res) {
         search.value = Date.now().toString()
     }
+}
+
+const exportData = async () => {
+    const url = parseExportUrl(status.value, series.value)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `tasks_${new Date().toLocaleString()}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
 }
 
 const loadItems = async ({

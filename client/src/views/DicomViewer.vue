@@ -9,6 +9,17 @@
             <v-btn icon @click="resetCamera">
                 <v-icon>mdi-refresh</v-icon>
             </v-btn>
+            <v-btn icon>
+                <v-icon>mdi-file-chart-outline</v-icon>
+                <v-dialog activator="parent" persistent>
+                    <template v-slot:default="{ isActive }">
+                        <ResultCard
+                            @close="isActive.value = false"
+                            :id="router.currentRoute.value.params.id as string"
+                        />
+                    </template>
+                </v-dialog>
+            </v-btn>
         </v-app-bar>
 
         <!-- Main Content Area -->
@@ -37,9 +48,6 @@
                     </pane>
                 </splitpanes>
             </v-container>
-
-            <!-- Floating Action Button -->
-            <v-fab icon="mdi-lightbulb-on" color="primary" location="right bottom" app></v-fab>
         </v-main>
     </v-app>
 </template>
@@ -48,7 +56,7 @@
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 
-import { onBeforeUnmount, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 import {
@@ -71,6 +79,7 @@ import {
 import { generateImageIds, prefetchMetadataInformation, processS3ZipFile } from '@/utils'
 import { getTask } from '@/apis'
 import { wadouri } from '@cornerstonejs/dicom-image-loader'
+import ResultCard from '@/components/ResultCard.vue'
 
 const router = useRouter()
 
@@ -186,18 +195,16 @@ const resize = useDebounceFn(() => {
 }, 350)
 
 onMounted(async () => {
-    const id = router.currentRoute.value.params.id
-    const res = await getTask(id as string)
+    const res = await getTask(router.currentRoute.value.params.id as string)
     if (res) {
         const files = await processS3ZipFile(res.id)
-        console.log(files)
         if (!files) return
         const imageIds = generateImageIds(files)
         await render(imageIds)
     }
 })
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
     wadouri.fileManager.purge()
     ToolGroupManager.destroyToolGroup(toolGroupId)
     cache.purgeCache()

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"server/internal/utils"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type TasksHandler struct {
@@ -42,6 +44,18 @@ func (h *TasksHandler) GetTask(c *gin.Context) {
 	data := responses.GetTaskResponse{}
 	_ = copier.Copy(&data, &task)
 	resp.SuccessResponse(c, http.StatusOK, data)
+}
+
+func (h *TasksHandler) ExportTasks(c *gin.Context) {
+	status := strings.TrimSpace(c.Query("status"))
+	series := strings.TrimSpace(c.Query("series"))
+	filePath, err := h.tasksService.ExportTasks(series, status)
+	var resp responses.BaseResponse
+	if err != nil {
+		resp.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.FileAttachment(filePath, fmt.Sprintf("tasks_%s.csv", time.Now().String()))
 }
 
 func (h *TasksHandler) CreateTask(c *gin.Context) {

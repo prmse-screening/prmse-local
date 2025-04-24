@@ -32,10 +32,11 @@ func wireApp() (*http.Server, error) {
 	miniRepo := storage.NewMiniRepo(client)
 	tasksService := services.NewTasksService(tasksRepo, miniRepo)
 	tasksHandler := handlers.NewTasksHandler(tasksService)
-	dicomService := services.NewDicomService(miniRepo)
+	dicomService := services.NewDicomService(miniRepo, tasksRepo)
 	dicomHandler := handlers.NewDicomHandler(dicomService)
 	v := rpc.NewRpcClient()
 	tasksScheduler := schedule.NewTasksScheduler(tasksRepo, v, miniRepo)
-	server := NewServer(tasksHandler, dicomHandler, tasksScheduler)
+	tasksCleaner := schedule.NewTaskCleaner()
+	server := NewServer(tasksHandler, dicomHandler, tasksScheduler, tasksCleaner)
 	return server, nil
 }
