@@ -1,7 +1,27 @@
 [app]
 Port = 8080
 
+# Database routes hostname or IP address
 [database]
+# Database source: "MySQL" or "SQLite", default is MySQL
+Source = "MySQL"
+
+[database.MySQL]
+Host = "localhost"
+# Database routes port number
+Port = 3306
+# Name of the database to connect to
+Name = "prmse_local"
+# Username for the database connection
+Username = "root"
+# Password for the database connection
+Password = "xsd1998715"
+# Maximum number of idle connections in the database connection pool
+MaxIdleConns = 1
+# Maximum number of open connections in the database connection pool
+SetMaxOpenConns = 10
+
+[database.SQLite]
 Path = "server.db"
 
 [worker]

@@ -19,28 +19,37 @@ func Init() {
 }
 
 type Config struct {
-	App      AppConfig
-	Database DatabaseConfig
-	Worker   WorkerConfig
-	Minio    MinioConfig
-}
+	App struct {
+		Port int `mapstructure:"Port"`
+	} `mapstructure:"app"`
 
-type AppConfig struct {
-	Port int
-}
+	Database struct {
+		Source string `mapstructure:"Source"`
 
-type DatabaseConfig struct {
-	Path string
-}
+		SQLite struct {
+			Path string `mapstructure:"Path"`
+		} `mapstructure:"SQLite"`
 
-type WorkerConfig struct {
-	Endpoints []string
-	Cpu       bool
-}
+		MySQL struct {
+			Host            string `mapstructure:"Host"`
+			Port            int    `mapstructure:"Port"`
+			Name            string `mapstructure:"Name"`
+			Username        string `mapstructure:"Username"`
+			Password        string `mapstructure:"Password"`
+			MaxIdleConns    int    `mapstructure:"MaxIdleConns"`
+			SetMaxOpenConns int    `mapstructure:"SetMaxOpenConns"`
+		} `mapstructure:"MySQL"`
+	} `mapstructure:"database"`
 
-type MinioConfig struct {
-	Endpoint      string
-	AccessKey     string
-	SecretKey     string
-	DefaultBucket string
+	Worker struct {
+		Endpoints []string `mapstructure:"Endpoints"`
+		Cpu       bool     `mapstructure:"Cpu"`
+	} `mapstructure:"worker"`
+
+	Minio struct {
+		Endpoint      string `mapstructure:"Endpoint"`
+		AccessKey     string `mapstructure:"AccessKey"`
+		SecretKey     string `mapstructure:"SecretKey"`
+		DefaultBucket string `mapstructure:"DefaultBucket"`
+	} `mapstructure:"minio"`
 }

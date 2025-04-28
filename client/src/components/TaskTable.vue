@@ -137,7 +137,7 @@ const itemsPerPage = ref(10)
 const totalItems = ref(0)
 const loading = ref(false)
 const headers: DataTableHeader[] = [
-    { title: 'ID', align: 'start', sortable: false, key: 'id' },
+    { title: 'ID', align: 'start', sortable: true, key: 'id' },
     { title: 'Series', align: 'start', sortable: false, key: 'series' },
     { title: 'Status', align: 'start', sortable: false, key: 'status' },
     { title: 'Model', align: 'start', sortable: false, key: 'model' },

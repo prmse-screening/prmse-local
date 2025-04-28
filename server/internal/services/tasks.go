@@ -91,7 +91,7 @@ func (s *TasksService) ExportTasks(series, status string) (string, error) {
 			fmt.Sprintf("%d", task.ID),
 			task.Series,
 			task.Status.String(),
-			task.Result,
+			task.Result.String(),
 			task.Model,
 			fmt.Sprintf("%d", task.Order),
 			task.Updated.Format(time.RFC3339),
@@ -160,6 +160,9 @@ func (s *TasksService) GetUploadPostUrl(series string) (string, map[string]strin
 }
 
 func (s *TasksService) GetListPagination(page, pageSize int, series, status, sortKey, sortOrder string) ([]*entities.Task, int64, error) {
+	if sortKey == "order" {
+		sortKey = "order_time"
+	}
 	tasks, total, err := s.tasksRepo.ListWithPagination(page, pageSize, series, status, sortKey, sortOrder)
 	if err != nil {
 		return nil, 0, bizErr.GetTasksErr

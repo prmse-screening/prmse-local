@@ -88,7 +88,7 @@ func (s *TasksScheduler) handleNextTask(id int) error {
 	}
 
 	task.Status = enums.Completed
-	task.Result = resp.Result
+	task.Result = []byte(resp.Result)
 
 	if err = s.tasksRepo.Update(task); err != nil {
 		return bizErr.UpdateTaskErr

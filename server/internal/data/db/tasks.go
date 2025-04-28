@@ -7,7 +7,7 @@ import (
 	"server/internal/models/entities"
 )
 
-var allowedSortKeys = map[string]bool{"order": true, "updated": true}
+var allowedSortKeys = map[string]bool{"id": true, "order_time": true, "updated": true}
 
 type TasksRepo struct {
 	db *gorm.DB
@@ -98,7 +98,7 @@ func (r *TasksRepo) ListWithPagination(page, pageSize int, status, series, sortK
 func (r *TasksRepo) NextTask() (*entities.Task, error) {
 	var task entities.Task
 	err := r.db.Where("status = ?", 1).
-		Order("\"order\"").Take(&task).Error
+		Order("order_time").Take(&task).Error
 
 	if err != nil {
 		return nil, err

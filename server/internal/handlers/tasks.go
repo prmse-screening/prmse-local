@@ -97,6 +97,7 @@ func (h *TasksHandler) UpdateTask(c *gin.Context) {
 
 func (h *TasksHandler) PrioritizeTask(c *gin.Context) {
 	var req requests.UpdateTaskRequest
+
 	if err := utils.Bind(c, &req); err != nil {
 		return
 	}

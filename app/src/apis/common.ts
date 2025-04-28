@@ -7,6 +7,7 @@ const request = async <T>(url: string, method: 'GET' | 'POST', body?: any): Prom
     try {
         const headers: Record<string, string> = {}
         if (body) headers['Content-Type'] = 'application/json'
+        console.log(body)
         const response = await fetch(`${localStorage.getItem('base')}${url}`, {
             headers,
             method,
