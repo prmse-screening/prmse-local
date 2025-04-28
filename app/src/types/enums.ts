@@ -27,4 +27,5 @@ export const STATUS_LIST = [
     { label: 'Pending', value: TaskStatus.Pending },
     { label: 'Running', value: TaskStatus.Running },
     { label: 'Success', value: TaskStatus.Success },
+    { label: 'Failed', value: TaskStatus.Failed },
 ]

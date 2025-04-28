@@ -112,7 +112,7 @@ export const processS3ZipFile = async (id: number): Promise<File[] | undefined> 
         if (!response.ok && !response.body) {
             console.error(`Failed to fetch file: ${response.status} ${response.statusText}`)
         }
-        const reader = response.body!.getReader()
+        const reader = response.body?.getReader()
 
         const unzip = new Unzip()
         unzip.register(UnzipInflate)
@@ -137,8 +137,8 @@ export const processS3ZipFile = async (id: number): Promise<File[] | undefined> 
             file.start()
         }
 
-        while (true) {
-            const { done, value } = await reader!.read()
+        while (reader) {
+            const { done, value } = await reader.read()
             if (done) break
             unzip.push(value)
         }

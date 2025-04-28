@@ -11,7 +11,7 @@
             </v-btn>
             <v-btn icon>
                 <v-icon>mdi-file-chart-outline</v-icon>
-                <v-dialog activator="parent" persistent>
+                <v-dialog activator="parent" persistent max-width="66vw">
                     <template v-slot:default="{ isActive }">
                         <ResultCard
                             @close="isActive.value = false"

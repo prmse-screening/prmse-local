@@ -30,12 +30,25 @@ const routes = [
         path: '/viewer/:id',
         name: 'Viewer',
         component: () => import('@/views/DicomViewer.vue'),
-    }
+    },
+    {
+        path: '/config',
+        name: 'Config',
+        component: () => import('@/views/Config.vue'),
+    },
 ]
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
+})
+
+router.beforeEach((to, from) => {
+    const hasUrlConfig = localStorage.getItem('base')
+    if (hasUrlConfig || to.name === 'Config') {
+        return
+    }
+    return { name: 'Config' }
 })
 
 export default router

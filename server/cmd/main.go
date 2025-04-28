@@ -14,6 +14,7 @@ import (
 	"server/internal/handlers"
 	"server/internal/logger"
 	"server/internal/middlewares"
+	"server/internal/models/responses"
 	"server/internal/schedule"
 	"syscall"
 	"time"
@@ -24,29 +25,27 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 	engine := gin.New()
 	engine.Use(gin.Recovery(), middlewares.Logger(), cors.Default())
 
-	api := engine.Group("/api")
+	engine.GET("/ping", func(c *gin.Context) {
+		var response responses.BaseResponse
+		response.SuccessResponse(c, http.StatusOK, "pong")
+	})
+
+	tasks := engine.Group("/tasks")
 	{
-		api.GET("/ping", func(c *gin.Context) {
-			c.JSON(200, "pong")
-		})
+		tasks.GET("/:id", t.GetTask)
+		tasks.POST("/create", t.CreateTask)
+		tasks.POST("/update", t.UpdateTask)
+		tasks.POST("/prioritize", t.PrioritizeTask)
+		tasks.POST("/delete", t.DeleteTask)
+		tasks.POST("/device", t.SetWorkerDevice)
+		tasks.GET("/uploadPost", t.GetUploadPostUrl)
+		tasks.GET("/list", t.GetListPagination)
+		tasks.GET("/export", t.ExportTasks)
+	}
 
-		tasks := api.Group("/tasks")
-		{
-			tasks.GET("/:id", t.GetTask)
-			tasks.POST("/create", t.CreateTask)
-			tasks.POST("/update", t.UpdateTask)
-			tasks.POST("/prioritize", t.PrioritizeTask)
-			tasks.POST("/delete", t.DeleteTask)
-			tasks.POST("/device", t.SetWorkerDevice)
-			tasks.GET("/uploadPost", t.GetUploadPostUrl)
-			tasks.GET("/list", t.GetListPagination)
-			tasks.GET("/export", t.ExportTasks)
-		}
-
-		dicom := api.Group("/dicom")
-		{
-			dicom.GET("/:id", d.GetUrl)
-		}
+	dicom := engine.Group("/dicom")
+	{
+		dicom.GET("/:id", d.GetUrl)
 	}
 
 	srv := &http.Server{
