@@ -17,6 +17,7 @@
     "@cornerstonejs/tools": "^3.10.30",
     "@fontsource/roboto": "5.2.5",
     "@mdi/font": "7.4.47",
+    "@tauri-apps/plugin-dialog": "~2",
     "@tauri-apps/plugin-http": "~2",
     "@vueuse/core": "^13.1.0",
     "dayjs": "^1.11.13",

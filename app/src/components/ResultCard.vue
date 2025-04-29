@@ -49,7 +49,7 @@ const { pause, isActive } = useIntervalFn(
     async () => {
         const task = await getTask(props.id)
         if (task && task.result) {
-            res.value = JSON.parse(task.result)
+            res.value = task.result
             pause()
         }
     },

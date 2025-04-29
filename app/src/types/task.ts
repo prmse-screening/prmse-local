@@ -4,7 +4,7 @@ export type Task = {
     id: number
     series: string
     status: TaskStatus
-    result: string
+    result: { prediction: number[]; threshold: number }
     model: string
     order: number
     updated: string

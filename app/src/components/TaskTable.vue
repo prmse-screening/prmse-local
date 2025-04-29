@@ -6,17 +6,6 @@
         </v-card-title>
         <v-card-item>
             <v-row class="align-center justify-space-between" no-gutters>
-                <v-col cols="12" md="2" class="d-flex align-center mb-2 mb-md-0">
-                    <v-btn
-                        prepend-icon="mdi-export-variant"
-                        style="width: 100%"
-                        color="primary"
-                        variant="tonal"
-                        @click="exportData"
-                    >
-                        Export
-                    </v-btn>
-                </v-col>
                 <v-col cols="12" md="6" class="mb-2 mb-md-0">
                     <v-text-field
                         v-model="series"
@@ -46,6 +35,26 @@
                         clearable
                         style="width: 100%"
                     />
+                </v-col>
+                <v-col cols="12" md="auto" class="d-flex align-center mb-2 mb-md-0">
+                    <v-btn
+                            prepend-icon="mdi-export-variant"
+                            color="primary"
+                            variant="tonal"
+                            @click="exportData"
+                    >
+                        Export
+                    </v-btn>
+                </v-col>
+                <v-col cols="12" md="auto" class="d-flex align-center mb-2 mb-md-0">
+                    <v-btn
+                            prepend-icon="mdi-refresh"
+                            color="secondary"
+                            variant="tonal"
+                            @click="refresh"
+                    >
+                        Refresh
+                    </v-btn>
                 </v-col>
             </v-row>
         </v-card-item>
@@ -152,6 +161,10 @@ const serverItems = ref<Task[]>([])
 
 watchDebounced(series, () => (search.value = Date.now().toString()), { debounce: 500, maxWait: 1000 })
 watch(status, () => (search.value = Date.now().toString()))
+
+const refresh = () => (search.value = Date.now().toString())
+
+defineExpose({ refresh })
 
 const viewItem = async (id: number) => {
     await router.replace({ name: 'Viewer', params: { id } })

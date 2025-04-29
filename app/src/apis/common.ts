@@ -1,13 +1,13 @@
 import { toast } from 'vue-sonner'
-import type { BaseResponse } from '@/types'
+import type { BaseResponse, S3UploadForm } from '@/types'
 import { fetch } from '@tauri-apps/plugin-http'
+import { invoke } from '@tauri-apps/api/core'
 
 export const BASE_URL = 'http://localhost:8080'
 const request = async <T>(url: string, method: 'GET' | 'POST', body?: any): Promise<T | null> => {
     try {
         const headers: Record<string, string> = {}
         if (body) headers['Content-Type'] = 'application/json'
-        console.log(body)
         const response = await fetch(`${localStorage.getItem('base')}${url}`, {
             headers,
             method,
@@ -34,29 +34,38 @@ export const ping = async () => {
     return res === 'pong'
 }
 
-type S3UploadForm = Record<string, string>
-export const uploadToS3 = async (url: string, form: S3UploadForm, file: File): Promise<boolean> => {
-    const formData = new FormData()
-    Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, value)
-    })
+// export const uploadToS3 = async (url: string, form: S3UploadForm, file: File): Promise<boolean> => {
+//     const formData = new FormData()
+//     Object.entries(form).forEach(([key, value]) => {
+//         formData.append(key, value)
+//     })
+//
+//     formData.append('file', file)
+//
+//     try {
+//         const res = await fetch(url, {
+//             method: 'POST',
+//             body: formData,
+//         })
+//
+//         if (res.ok) {
+//             return true
+//         } else {
+//             console.error('Upload failed:', await res.text())
+//             return false
+//         }
+//     } catch (error) {
+//         console.error('Upload error:', error)
+//         return false
+//     }
+// }
 
-    formData.append('file', file)
-
-    try {
-        const res = await fetch(url, {
-            method: 'POST',
-            body: formData,
-        })
-
-        if (res.ok) {
-            return true
-        } else {
-            console.error('Upload failed:', await res.text())
-            return false
-        }
-    } catch (error) {
-        console.error('Upload error:', error)
+export const uploadToS3 = async (url: string, form: S3UploadForm, folder: string): Promise<boolean> => {
+    const res = await invoke('upload', { url, form, folder })
+    if (res === 'success') {
+        return true
+    } else {
+        console.error('Upload failed:', res)
         return false
     }
 }

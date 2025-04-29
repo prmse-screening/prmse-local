@@ -1,6 +1,7 @@
 import { TaskStatus } from '@/types/enums'
 import type { Task } from '@/types'
 
+// Request
 export type CreateTaskRequest = {
     series: string
 }
@@ -17,6 +18,7 @@ export type UpdateTaskRequest = {
 
 export type DeleteTaskRequest = UpdateTaskRequest
 
+// Response
 export type GetTaskResponse = Task
 
 export type CreateTaskResponse = Task
@@ -26,7 +28,9 @@ export type GetTaskLists = {
     total: number
 }
 
+export type S3UploadForm = Record<string, string>
+
 export type GetUploadUrlResponse = {
     url: string
-    form: Record<string, string>
+    form: S3UploadForm
 }

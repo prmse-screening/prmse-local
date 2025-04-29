@@ -2,6 +2,8 @@ import * as dicomParser from 'dicom-parser'
 import { AsyncZipDeflate, Unzip, UnzipInflate, Zip } from 'fflate'
 import { wadouri } from '@cornerstonejs/dicom-image-loader'
 import { parseDownloadUrl } from '@/apis/common.ts'
+import { invoke } from '@tauri-apps/api/core'
+import { toast } from 'vue-sonner'
 
 export const getSeries = async (file: File) => {
     const arrayBuffer = await file.arrayBuffer()
@@ -17,48 +19,61 @@ export const getSeries = async (file: File) => {
     }
 }
 
-export const listLeafFolders = async (dirHandle: FileSystemDirectoryHandle): Promise<FileSystemDirectoryHandle[]> => {
-    const results: FileSystemDirectoryHandle[] = []
-    const traverse = async (handle: FileSystemDirectoryHandle) => {
-        let hasSubDir = false
-        // @ts-ignore
-        for await (const entry of handle.values()) {
-            if (entry.kind === 'directory') {
-                hasSubDir = true
-                await traverse(entry)
-            }
-        }
+// export const listLeafFolders = async (dirHandle: FileSystemDirectoryHandle): Promise<FileSystemDirectoryHandle[]> => {
+//     const results: FileSystemDirectoryHandle[] = []
+//     const traverse = async (handle: FileSystemDirectoryHandle) => {
+//         let hasSubDir = false
+//         // @ts-ignore
+//         for await (const entry of handle.values()) {
+//             if (entry.kind === 'directory') {
+//                 hasSubDir = true
+//                 await traverse(entry)
+//             }
+//         }
+//
+//         if (!hasSubDir) {
+//             results.push(handle)
+//         }
+//     }
+//     await traverse(dirHandle)
+//     return results
+// }
 
-        if (!hasSubDir) {
-            results.push(handle)
-        }
+export const listLeafFolders = async (dir: string): Promise<string[] | undefined> => {
+    try {
+        return await invoke<string[]>('list_leaf_folders', { root: dir })
+    } catch (e) {
+        toast.error(`Failed to list leaf folders in ${dir}`)
+        console.error(e)
     }
-    await traverse(dirHandle)
-    return results
 }
 
-export const processDirectory = async (handle: FileSystemDirectoryHandle) => {
-    const files: File[] = []
-    const seriesSet = new Set<string>()
+// export const processDirectory = async (handle: FileSystemDirectoryHandle) => {
+//     const files: File[] = []
+//     const seriesSet = new Set<string>()
+//
+//     // @ts-ignore
+//     for await (const entry of handle.values()) {
+//         if (entry.kind === 'file') {
+//             const file = await entry.getFile()
+//             files.push(file)
+//
+//             const uid = await getSeries(file)
+//             if (uid) {
+//                 seriesSet.add(uid)
+//                 if (seriesSet.size > 1) {
+//                     throw new Error(
+//                         `Multiple seriesUIDs exist in the folder “${handle.name}”, the upload requires that each folder contain only one series.`
+//                     )
+//                 }
+//             }
+//         }
+//     }
+//     return { files, series: seriesSet.values().next().value }
+// }
 
-    // @ts-ignore
-    for await (const entry of handle.values()) {
-        if (entry.kind === 'file') {
-            const file = await entry.getFile()
-            files.push(file)
-
-            const uid = await getSeries(file)
-            if (uid) {
-                seriesSet.add(uid)
-                if (seriesSet.size > 1) {
-                    throw new Error(
-                        `Multiple seriesUIDs exist in the folder “${handle.name}”, the upload requires that each folder contain only one series.`
-                    )
-                }
-            }
-        }
-    }
-    return { files, series: seriesSet.values().next().value }
+export const processDirectory = async (dir: string) => {
+    return await invoke<string | undefined>('process_dir', {root:dir})
 }
 
 export const compressFilesToZip = async (files: File[]): Promise<File> => {
