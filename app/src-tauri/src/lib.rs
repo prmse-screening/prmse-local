@@ -2,11 +2,12 @@ use crate::error::{AppError, AppResult};
 use crate::utils::compress::compress_files;
 use crate::utils::dicom::get_series_element;
 use anyhow::anyhow;
+use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use tauri_plugin_http::{reqwest, reqwest::multipart::Form};
-use tokio::fs;
+use tokio::{fs, io};
 
 mod error;
 mod utils;
@@ -19,7 +20,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             upload,
             list_leaf_folders,
-            process_dir
+            process_dir,
+            export
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
@@ -46,7 +48,6 @@ async fn upload(url: String, folder: String, form: HashMap<String, String>) -> A
     }
 
     let (zip_path, _dir) = compress_files(files)?;
-    println!("返回的目录是：{:?}", zip_path);
 
     let mut upload_form = Form::new();
     for (key, value) in form {
@@ -111,4 +112,21 @@ async fn process_dir(root: String) -> AppResult<Option<String>> {
     })
     .await?;
     series_uid
+}
+
+#[tauri::command]
+async fn export(path: String, url: String) -> AppResult<bool> {
+    let client = reqwest::Client::new();
+    let res = client.get(url).send().await?;
+
+    if res.status().is_success() {
+        let mut f = fs::File::create(path).await?;
+        let mut stream = res.bytes_stream();
+        while let Some(Ok(chunk)) = stream.next().await {
+            io::copy(&mut chunk.as_ref(), &mut f).await?;
+        }
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }

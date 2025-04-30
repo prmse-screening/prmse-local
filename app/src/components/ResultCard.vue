@@ -34,6 +34,7 @@
 import { useIntervalFn } from '@vueuse/core'
 import { computed, onUnmounted, ref } from 'vue'
 import { getTask } from '@/apis'
+import type {Result} from "@/types";
 
 const emit = defineEmits<{
     close: []
@@ -42,7 +43,7 @@ const props = defineProps<{
     id: string
 }>()
 
-const res = ref<{ prediction: number[]; threshold: number }>({ prediction: [], threshold: 0 })
+const res = ref<Result>({ prediction: [], threshold: 0 })
 const health = computed(() => res.value.prediction[0] < res.value.threshold)
 
 const { pause, isActive } = useIntervalFn(

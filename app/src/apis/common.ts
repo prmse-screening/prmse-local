@@ -2,6 +2,8 @@ import { toast } from 'vue-sonner'
 import type { BaseResponse, S3UploadForm } from '@/types'
 import { fetch } from '@tauri-apps/plugin-http'
 import { invoke } from '@tauri-apps/api/core'
+import { useRouter } from 'vue-router'
+import router from "@/router";
 
 export const BASE_URL = 'http://localhost:8080'
 const request = async <T>(url: string, method: 'GET' | 'POST', body?: any): Promise<T | null> => {
@@ -22,6 +24,9 @@ const request = async <T>(url: string, method: 'GET' | 'POST', body?: any): Prom
     } catch (e: any) {
         console.error('HTTP Error:', e)
         toast.error(e.message || 'Network error')
+        localStorage.removeItem('base')
+        await router.replace({ name: 'Config' })
+        console.log('Redirect to config page')
         return null
     }
 }

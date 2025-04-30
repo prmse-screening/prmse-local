@@ -38,21 +38,17 @@
                 </v-col>
                 <v-col cols="12" md="auto" class="d-flex align-center mb-2 mb-md-0">
                     <v-btn
-                            prepend-icon="mdi-export-variant"
-                            color="primary"
-                            variant="tonal"
-                            @click="exportData"
+                        prepend-icon="mdi-export-variant"
+                        color="primary"
+                        variant="tonal"
+                        @click="exportData"
+                        :loading="isExport"
                     >
                         Export
                     </v-btn>
                 </v-col>
                 <v-col cols="12" md="auto" class="d-flex align-center mb-2 mb-md-0">
-                    <v-btn
-                            prepend-icon="mdi-refresh"
-                            color="secondary"
-                            variant="tonal"
-                            @click="refresh"
-                    >
+                    <v-btn prepend-icon="mdi-refresh" color="secondary" variant="tonal" @click="refresh">
                         Refresh
                     </v-btn>
                 </v-col>
@@ -140,7 +136,11 @@ import { VDataTableServer } from 'vuetify/components'
 import { watchDebounced } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { parseExportUrl } from '@/apis/common.ts'
+import { save } from '@tauri-apps/plugin-dialog'
+import { invoke } from '@tauri-apps/api/core'
+import { toast } from 'vue-sonner'
 
+const isExport = ref(false)
 const router = useRouter()
 const itemsPerPage = ref(10)
 const totalItems = ref(0)
@@ -185,13 +185,25 @@ const prioritizeItem = async (item: UpdateTaskRequest) => {
 }
 
 const exportData = async () => {
+    const path = await save({
+        title: `Exports tasks`,
+        defaultPath: `tasks_${dayjs(new Date()).format('YYYY-MM-DD')}`,
+        filters: [
+            {
+                name: `CSV`,
+                extensions: ['csv'],
+            },
+        ],
+    })
+    if (!path) return
+
+    isExport.value = true
     const url = parseExportUrl(status.value, series.value)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `tasks_${new Date().toLocaleString()}.csv`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    const res = await invoke<boolean>('export', { path, url })
+    if (res) {
+        toast.success(`Tasks exported to ${path}`)
+    }
+    isExport.value = false
 }
 
 const loadItems = async ({

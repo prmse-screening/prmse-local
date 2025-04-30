@@ -1,5 +1,5 @@
 import { TaskStatus } from '@/types/enums'
-import type { Task } from '@/types'
+import type {Result, Task} from '@/types'
 
 // Request
 export type CreateTaskRequest = {
@@ -10,7 +10,7 @@ export type UpdateTaskRequest = {
     id: number
     series: string
     status: TaskStatus
-    result: string
+    result: Result
     model: string
     order: number
     updated: string

@@ -8,7 +8,6 @@ use tempfile::{tempdir, TempDir};
 const TEMP_FILE_NAME: &'static str = "TEMP_COMPRESS";
 pub fn compress_files(files: Vec<PathBuf>) -> Result<(PathBuf, TempDir)> {
     let dir = tempdir().context("Failed to create temp dir")?;
-    println!("临时目录路径: {:?}", dir.path());
 
     let file_path = dir.path().join(TEMP_FILE_NAME);
 
