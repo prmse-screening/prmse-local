@@ -1,5 +1,6 @@
 import * as dicomParser from 'dicom-parser'
-import { AsyncZipDeflate, Unzip, UnzipInflate, Zip } from 'fflate'
+// import { AsyncZipDeflate, Unzip, UnzipInflate, Zip } from 'fflate'
+import { Unzip, UnzipInflate } from 'fflate'
 import { wadouri } from '@cornerstonejs/dicom-image-loader'
 import { parseDownloadUrl } from '@/apis/common.ts'
 import { invoke } from '@tauri-apps/api/core'
@@ -76,44 +77,44 @@ export const processDirectory = async (dir: string) => {
     return await invoke<string | undefined>('process_dir', {root:dir})
 }
 
-export const compressFilesToZip = async (files: File[]): Promise<File> => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const chunks: Uint8Array[] = []
-            const zip = new Zip()
-
-            zip.ondata = async (err, chunk, final) => {
-                if (err) {
-                    console.error('Error during compression:', err)
-                    reject(err)
-                }
-
-                chunks.push(chunk)
-
-                if (final) {
-                    const zipBlob = new Blob(chunks, { type: 'application/zip' })
-                    const zipFile = new File([zipBlob], 'c.zip', {
-                        type: 'application/zip',
-                        lastModified: new Date().getTime(),
-                    })
-                    resolve(zipFile)
-                }
-            }
-
-            for (const file of files) {
-                const buffer = await file.arrayBuffer()
-                const fileData = new Uint8Array(buffer)
-                const fileEntry = new AsyncZipDeflate(file.name)
-                zip.add(fileEntry)
-                fileEntry.push(fileData, true)
-            }
-
-            zip.end()
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
+// export const compressFilesToZip = async (files: File[]): Promise<File> => {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             const chunks: Uint8Array[] = []
+//             const zip = new Zip()
+//
+//             zip.ondata = async (err, chunk, final) => {
+//                 if (err) {
+//                     console.error('Error during compression:', err)
+//                     reject(err)
+//                 }
+//
+//                 chunks.push(chunk)
+//
+//                 if (final) {
+//                     const zipBlob = new Blob(chunks, { type: 'application/zip' })
+//                     const zipFile = new File([zipBlob], 'c.zip', {
+//                         type: 'application/zip',
+//                         lastModified: new Date().getTime(),
+//                     })
+//                     resolve(zipFile)
+//                 }
+//             }
+//
+//             for (const file of files) {
+//                 const buffer = await file.arrayBuffer()
+//                 const fileData = new Uint8Array(buffer)
+//                 const fileEntry = new AsyncZipDeflate(file.name)
+//                 zip.add(fileEntry)
+//                 fileEntry.push(fileData, true)
+//             }
+//
+//             zip.end()
+//         } catch (error) {
+//             reject(error)
+//         }
+//     })
+// }
 
 export const prefetchMetadataInformation = async (imageIdsToPrefetch: string[]) => {
     await Promise.all(imageIdsToPrefetch.map((id) => wadouri.loadImage(id).promise))
