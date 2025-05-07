@@ -10,7 +10,7 @@
                     <v-text-field
                         v-model="series"
                         density="compact"
-                        label="Search"
+                        label="Search series"
                         prepend-inner-icon="mdi-magnify"
                         variant="solo-filled"
                         flat
@@ -71,7 +71,6 @@
             <template v-slot:item.updated="{ value }">
                 {{ dayjs(value).format('YYYY-MM-DD HH:mm:ss') }}
             </template>
-
             <template v-slot:item.actions="{ item }">
                 <div class="d-flex ga-2">
                     <v-icon
@@ -102,7 +101,6 @@
                     </v-menu>
                 </div>
             </template>
-
             <template v-slot:no-data>
                 <v-btn
                     prepend-icon="mdi-backup-restore"
@@ -119,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import { deleteTask, getTaskList, prioritizeTask } from '@/apis'
 import {
     type DeleteTaskRequest,
@@ -133,7 +131,7 @@ import {
 import { type DataTableHeader } from 'vuetify'
 import dayjs from 'dayjs'
 import { VDataTableServer } from 'vuetify/components'
-import { watchDebounced } from '@vueuse/core'
+import { useIntervalFn, watchDebounced } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { parseExportUrl } from '@/apis/common.ts'
 import { save } from '@tauri-apps/plugin-dialog'
@@ -159,12 +157,18 @@ const series = ref('')
 const status = ref<TaskStatus | undefined>(undefined)
 const serverItems = ref<Task[]>([])
 
-watchDebounced(series, () => (search.value = Date.now().toString()), { debounce: 500, maxWait: 1000 })
-watch(status, () => (search.value = Date.now().toString()))
+const triggerLoad = () => search.value = Date.now().toString()
+const refresh = () => triggerLoad()
 
-const refresh = () => (search.value = Date.now().toString())
+watchDebounced([series, status], () => triggerLoad(), { debounce: 500, maxWait: 1000 })
 
 defineExpose({ refresh })
+
+const { pause, resume } = useIntervalFn(
+    async () => refresh(),
+    3000,
+    { immediate: false }
+)
 
 const viewItem = async (id: number) => {
     await router.replace({ name: 'Viewer', params: { id } })
@@ -173,14 +177,14 @@ const viewItem = async (id: number) => {
 const deleteItem = async (item: DeleteTaskRequest) => {
     const res = await deleteTask(item)
     if (res) {
-        search.value = Date.now().toString()
+        triggerLoad()
     }
 }
 
 const prioritizeItem = async (item: UpdateTaskRequest) => {
     const res = await prioritizeTask(item)
     if (res) {
-        search.value = Date.now().toString()
+        triggerLoad()
     }
 }
 
@@ -215,6 +219,7 @@ const loadItems = async ({
     itemsPerPage: number
     sortBy?: { key: string; order: string }[]
 }) => {
+    pause()
     loading.value = true
     const sortKey = sortBy && sortBy[0]?.key
     const sortOrder = sortBy && sortBy[0]?.order
@@ -232,5 +237,8 @@ const loadItems = async ({
         totalItems.value = res.total
     }
     loading.value = false
+    resume()
 }
+
+onUnmounted(() => pause())
 </script>

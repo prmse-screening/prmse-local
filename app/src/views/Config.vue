@@ -42,7 +42,7 @@ import type { VForm } from 'vuetify/components'
 
 const router = useRouter()
 const form = useTemplateRef<VForm>('form')
-const backendUrl = ref('')
+const backendUrl = ref('http://localhost:8080')
 const errorMessage = ref('')
 const loading = ref(false)
 
