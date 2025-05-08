@@ -29,18 +29,18 @@ services:
     networks:
       - backend
 
-  server:
-    image: server:latest
-    container_name: server
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./config.toml:/server/config.toml
-    depends_on:
-      - mysql
-      - minio
-    networks:
-      - backend
+  # server:
+  #   image: server:latest
+  #   container_name: server
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./config.toml:/server/config.toml
+  #   depends_on:
+  #     - mysql
+  #     - minio
+  #   networks:
+  #     - backend
 
 networks:
   backend:
