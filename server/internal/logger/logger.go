@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	_ "gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"strings"
 	"time"

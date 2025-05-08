@@ -25,7 +25,6 @@ func (c *TasksCleaner) StartCSVFileCleaner() {
 func (c *TasksCleaner) cleanupOldCSVFiles(dir string, maxAge time.Duration) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		log.Errorf("readDir failed: %v", err)
 		return
 	}
 

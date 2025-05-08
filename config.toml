@@ -1,0 +1,35 @@
+[app]
+Port = 8080
+
+# Database routes hostname or IP address
+[database]
+# Database source: "MySQL" or "SQLite", default is MySQL
+Source = "MySQL"
+
+[database.MySQL]
+Host = "mysql"
+# Database routes port number
+Port = 3306
+# Name of the database to connect to
+Name = "prmse_db"
+# Username for the database connection
+Username = "prmse"
+# Password for the database connection
+Password = "prmse_db"
+# Maximum number of idle connections in the database connection pool
+MaxIdleConns = 1
+# Maximum number of open connections in the database connection pool
+SetMaxOpenConns = 10
+
+[database.SQLite]
+Path = "server.db"
+
+[worker]
+Endpoints = ["localhost:50051"]
+Cpu = false
+
+[minio]
+Endpoint = "minio:9000"
+AccessKey = "root"
+SecretKey = "prmse_admin"
+DefaultBucket = "prmse-ct"

@@ -14,6 +14,7 @@ import (
 	"server/internal/config"
 	"server/internal/data/db"
 	"server/internal/data/storage"
+	"server/internal/models/entities"
 	"time"
 )
 
@@ -41,6 +42,12 @@ func NewDatabase() (*gorm.DB, error) {
 		log.Errorf("Failed to connect to %s database: %v", config.Cfg.Database.Source, err)
 		return nil, err
 	}
+
+	if err = database.AutoMigrate(&entities.Task{}); err != nil {
+		log.Errorf("Failed to migrate database: %v", err)
+		return nil, err
+	}
+
 	return database, nil
 }
 
@@ -57,7 +64,6 @@ func newSQLite() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return database, nil
 }
 

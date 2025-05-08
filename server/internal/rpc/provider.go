@@ -18,7 +18,7 @@ func NewRpcClient() *[]WorkerClient {
 			log.Errorf("failed to connect to gRPC server: %v", err)
 		}
 		c := NewWorkerClient(conn)
-		log.Infof("Connected to gRPC server at %s", endpoint)
+		log.Infof("Build client to gRPC server at %s", endpoint)
 		clients = append(clients, c)
 	}
 	return &clients
