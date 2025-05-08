@@ -24,6 +24,8 @@ services:
       MYSQL_DATABASE: prmse_db
       MYSQL_USER: prmse
       MYSQL_PASSWORD: prmse_db
+    volumes:
+      - ./data/mysql:/var/lib/mysql
     networks:
       - backend
 
