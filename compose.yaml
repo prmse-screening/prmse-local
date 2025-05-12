@@ -28,19 +28,35 @@ services:
       - ./data/mysql:/var/lib/mysql
     networks:
       - backend
+  
+  worker:
+    image: worker:latest
+    container_name: worker
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - "50051:50051"
+    networks:
+      - backend
 
-  # server:
-  #   image: server:latest
-  #   container_name: server
-  #   ports:
-  #     - "8080:8080"
-  #   volumes:
-  #     - ./config.toml:/server/config.toml
-  #   depends_on:
-  #     - mysql
-  #     - minio
-  #   networks:
-  #     - backend
+  server:
+    image: server:latest
+    container_name: server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.toml:/server/config.toml
+    depends_on:
+      - mysql
+      - minio
+      - worker
+    networks:
+      - backend
 
 networks:
   backend:
