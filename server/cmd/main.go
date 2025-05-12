@@ -67,7 +67,11 @@ func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.
 func main() {
 	config.Init()
 	logger.Init()
-	srv, _ := wireApp()
+	srv, err := wireApp()
+	if err != nil {
+		log.Errorf("Init app error: %v", err)
+		panic("shutdown...")
+	}
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
