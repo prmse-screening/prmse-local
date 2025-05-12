@@ -1,9 +1,7 @@
 import json
 import os
-import random
 import shutil
 import tempfile
-import time
 import zipfile
 import grpc
 import asyncio
@@ -13,9 +11,8 @@ import worker_pb2_grpc
 
 from pydicom.misc import is_dicom
 from sybil import Sybil, Serie
-from sybil.utils.device_utils import get_default_device
 
-model = Sybil(device=get_default_device(), cache='./models')
+model = Sybil()
 
 
 def process(path: str) -> list[float] | None:
@@ -37,23 +34,14 @@ def process(path: str) -> list[float] | None:
                     paths.append(file_path)
 
             paths.sort()
-            # predictions = model.predict(series=Serie(paths))
-            time.sleep(6)
-            # return predictions.scores[0]
-            return [random.random() for _ in range(6)]
+            predictions = model.predict(series=Serie(paths))
+            return predictions.scores[0]
     finally:
-        print(tmp_dir)
         shutil.rmtree(tmp_dir)
 
 
 class WorkerServicer(worker_pb2_grpc.WorkerServicer):
     async def Infer(self, request, context):
-        if request.cpu:
-            model.to(device='cpu')
-        else:
-            model.to(device=get_default_device())
-
-        print("Inference request received")
         prediction = process(request.path)
         res = {
             "prediction": prediction,
@@ -67,7 +55,6 @@ async def serve():
     worker_pb2_grpc.add_WorkerServicer_to_server(WorkerServicer(), server)
     server.add_insecure_port('[::]:50051')
     await server.start()
-    print('Server started')
     try:
         await server.wait_for_termination()
     finally:

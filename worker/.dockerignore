@@ -1,0 +1,6 @@
+.venv
+.idea
+models
+.gitignore
+__pycache__
+docker

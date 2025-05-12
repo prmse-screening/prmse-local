@@ -1,0 +1,19 @@
+FROM pytorch/pytorch:2.7.0-cuda11.8-cudnn9-runtime
+
+WORKDIR /worker
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+
+COPY ../../ .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download and cache trained models
+RUN python -c "from sybil import Sybil; model = Sybil()"
+
+ENTRYPOINT ["python", "worker.py"]

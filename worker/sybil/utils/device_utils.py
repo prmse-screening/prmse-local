@@ -70,3 +70,32 @@ def get_most_free_gpu():
             most_free_idx, most_free_val = i, free_mem
 
     return torch.device(f'cuda:{most_free_idx}')
+
+
+def get_most_suitable_device(min_free_memory=7.5 * 1024 ** 3):
+    """
+    Get most suitable device, if cuda is available and max free memory is large then the requirement,
+    otherwise, use mps (if available) or cpu.
+    :param min_free_memory: free memory requirement
+    :return: torch.device
+    """
+    if torch.cuda.is_available():
+        num_gpus = torch.cuda.device_count()
+        if num_gpus == 0:
+            return None
+
+        most_free_idx, most_free_val = -1, -1
+        for i in range(num_gpus):
+            free_mem, total_mem = get_device_mem_info(i)
+            if free_mem > most_free_val:
+                most_free_idx, most_free_val = i, free_mem
+
+        if most_free_val >= min_free_memory:
+            return torch.device(f'cuda:{most_free_idx}')
+
+    # Fallback to MPS if available
+    if torch.backends.mps.is_available():
+        return torch.device('mps')
+
+    # Fallback to CPU
+    return torch.device('cpu')

@@ -12,7 +12,7 @@ from sybil.serie import Serie
 from sybil.models.sybil import SybilNet
 from sybil.models.calibrator import SimpleClassifierGroup
 from sybil.utils.logging_utils import get_logger
-from sybil.utils.device_utils import get_default_device, get_most_free_gpu, get_device_mem_info
+from sybil.utils.device_utils import get_device_mem_info, get_most_suitable_device
 
 # Leaving this here for a bit; these are IDs to download the models from Google Drive
 NAME_TO_FILE = {
@@ -179,7 +179,7 @@ class Sybil:
             self.device = device
             self._device_flexible = False
         else:
-            self.device = get_default_device()
+            self.device = get_most_suitable_device()
 
         self.ensemble = torch.nn.ModuleList()
         for path in name_or_path:
@@ -431,7 +431,7 @@ class Sybil:
         Motivation is to enable multiprocessing without the processes needed to communicate.
         """
         if not torch.cuda.is_available():
-            return get_default_device()
+            return get_most_suitable_device()
 
         # Get size of the model in memory (approximate)
         model_mem = 9 * sum(p.numel() * p.element_size() for p in self.ensemble.parameters())
@@ -444,5 +444,4 @@ class Sybil:
         if cur_allocated < min_to_move:
             return self.device
         else:
-            # Otherwise, get the most free GPU
-            return get_most_free_gpu()
+            return get_most_suitable_device()

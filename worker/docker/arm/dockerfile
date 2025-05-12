@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+WORKDIR /worker
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+
+COPY ../../ .
+
+# Install torch
+RUN pip install --no-cache-dir torch torchvision torchaudio
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download and cache trained models
+RUN python -c "from sybil import Sybil; model = Sybil()"
+
+EXPOSE 50051
+
+ENTRYPOINT ["python", "worker.py"]
