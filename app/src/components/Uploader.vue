@@ -53,17 +53,18 @@ const upload = async (entities: string[]) => {
     isUploading.value = true
     for (const entity of entities) {
         try {
+            console.log(entity)
             const series = await processDirectory(entity)
-            if (!series) throw new Error('processDirectory failed')
+            if (!series) continue
 
             const task = await createTask({ series })
-            if (!task) throw new Error('createTask failed')
+            if (!task) continue
 
             const uploadInfo = await getUploadPostUrl({ series })
-            if (!uploadInfo) throw new Error('getUploadPostUrl failed')
+            if (!uploadInfo) continue
 
             const uploadRes = await uploadToS3(uploadInfo.url, uploadInfo.form, entity)
-            if (!uploadRes) throw new Error('uploadToS3 failed')
+            if (!uploadRes) continue
 
             task.status = TaskStatus.Pending
             await updateTask(task)
@@ -75,5 +76,6 @@ const upload = async (entities: string[]) => {
     }
     emit('uploaded')
     isUploading.value = false
+    curr.value = 0
 }
 </script>

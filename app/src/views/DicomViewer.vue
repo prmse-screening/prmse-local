@@ -80,15 +80,16 @@ import { generateImageIds, prefetchMetadataInformation, processS3ZipFile } from 
 import { getTask } from '@/apis'
 import { wadouri } from '@cornerstonejs/dicom-image-loader'
 import ResultCard from '@/components/ResultCard.vue'
+import ToolGroup from '@cornerstonejs/tools/dist/esm/store/ToolGroupManager/ToolGroup'
 
 const router = useRouter()
 
-const renderingEngineId = 'renderingEngine:1'
+const renderingEngineId = `renderingEngine:${Date.now()}`
 const viewportIds = ['CT_AXIAL', 'CT_SAGITTAL', 'CT_CORONAL']
 const volumeId = 'volume:1'
-const toolGroupId = 'group:1'
+const toolGroupId = `group:${Date.now()}`
 
-const render = async (imageIds: string[]) => {
+const initTools = (): ToolGroup | undefined => {
     const toolGroup = ToolGroupManager.createToolGroup(toolGroupId)
     addTool(StackScrollTool)
     addTool(WindowLevelTool)
@@ -126,7 +127,10 @@ const render = async (imageIds: string[]) => {
             },
         ],
     })
-
+    return toolGroup
+}
+const render = async (imageIds: string[]) => {
+    const toolGroup = initTools()
     await prefetchMetadataInformation(imageIds)
     if (cache.getVolume(volumeId)) {
         cache.removeVolumeLoadObject(volumeId)

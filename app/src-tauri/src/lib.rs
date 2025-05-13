@@ -101,17 +101,20 @@ struct ProcessDirResponse {
 async fn process_dir(root: String) -> AppResult<Option<String>> {
     let dir_path = PathBuf::from(root);
 
-    let series_uid = tokio::task::spawn_blocking(move || -> AppResult<Option<String>> {
-        for entry in std::fs::read_dir(dir_path)? {
-            let path = entry?.path();
-            if let Some(uid) = get_series_element(&path) {
-                return Ok(Some(uid));
-            }
+    if !dir_path.exists() || !dir_path.is_dir() {
+        return Err(AppError::Anyhow(anyhow!("{:?} is not a directory or doesn't exist!", dir_path)));
+    }
+    let mut dir_entries = tokio::fs::read_dir(dir_path).await?;
+    while let Some(entry) = dir_entries.next_entry().await? {
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
         }
-        Ok(None)
-    })
-    .await?;
-    series_uid
+        if let Some(uid) = get_series_element(&path) {
+            return Ok(Some(uid));
+        }
+    }
+    Ok(None)
 }
 
 #[tauri::command]

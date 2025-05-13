@@ -17,7 +17,7 @@ func (c *TasksCleaner) StartCSVFileCleaner() {
 	ticker := time.NewTicker(time.Minute)
 	go func() {
 		for range ticker.C {
-			c.cleanupOldCSVFiles("exports", time.Minute)
+			c.cleanupOldCSVFiles("exports", time.Minute*3)
 		}
 	}()
 }

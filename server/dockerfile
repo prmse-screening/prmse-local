@@ -20,13 +20,11 @@ WORKDIR /server
 RUN apk add --no-cache bash
 
 COPY --from=builder /go/bin/app ./app
-COPY ./wait-for-it.sh /usr/local/bin/wait-for-it
-RUN chmod +x /usr/local/bin/wait-for-it
 
 # Define the volume for configuration file (to be mounted later)
 VOLUME ["/app"]
 
 EXPOSE 8080
-ENTRYPOINT ["/usr/local/bin/wait-for-it", "mysql:3306", "-t", "60", "--", "/usr/local/bin/wait-for-it", "minio:9000", "-t", "60", "--", "./app"]
+ENTRYPOINT ["./app"]
 
 

@@ -101,17 +101,17 @@
                     </v-menu>
                 </div>
             </template>
-            <template v-slot:no-data>
-                <v-btn
-                    prepend-icon="mdi-backup-restore"
-                    color="primary"
-                    variant="tonal"
-                    border
-                    @click="loadItems({ page: 1, itemsPerPage: 10 })"
-                >
-                    Reset data
-                </v-btn>
-            </template>
+<!--            <template v-slot:no-data>-->
+<!--                <v-btn-->
+<!--                    prepend-icon="mdi-backup-restore"-->
+<!--                    color="primary"-->
+<!--                    variant="tonal"-->
+<!--                    border-->
+<!--                    @click="loadItems({ page: 1, itemsPerPage: 10 })"-->
+<!--                >-->
+<!--                    Reset data-->
+<!--                </v-btn>-->
+<!--            </template>-->
         </v-data-table-server>
     </v-card>
 </template>

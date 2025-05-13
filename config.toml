@@ -7,7 +7,7 @@ Port = 8080
 Source = "MySQL"
 
 [database.MySQL]
-Host = "mysql"
+Host = "localhost"
 # Database routes port number
 Port = 3306
 # Name of the database to connect to
@@ -29,7 +29,7 @@ Endpoints = ["localhost:50051"]
 Cpu = false
 
 [minio]
-Endpoint = "minio:9000"
+Endpoint = "localhost:9000"
 AccessKey = "root"
 SecretKey = "prmse_admin"
 DefaultBucket = "prmse-ct"

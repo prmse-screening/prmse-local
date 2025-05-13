@@ -76,16 +76,32 @@ func newMySQL() (*gorm.DB, error) {
 		config.Cfg.Database.MySQL.Port,
 		config.Cfg.Database.MySQL.Name,
 	)
-	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		SkipDefaultTransaction: true,
-		Logger: &sqlLogger{
-			SlowThreshold:             time.Second,
-			IgnoreRecordNotFoundError: true,
-			LogLevel:                  gormLogger.Warn,
-		},
-	})
+
+	var database *gorm.DB
+	var err error
+
+	maxRetries, baseInterval := 3, time.Second*3
+	for i := 0; i < maxRetries; i++ {
+		database, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+			SkipDefaultTransaction: true,
+			Logger: &sqlLogger{
+				SlowThreshold:             time.Second,
+				IgnoreRecordNotFoundError: true,
+				LogLevel:                  gormLogger.Warn,
+			},
+		})
+
+		if err == nil {
+			break
+		}
+
+		log.Errorf("MySQL connection failed, try again in %v", baseInterval)
+		time.Sleep(baseInterval)
+		baseInterval = baseInterval * (1 << i)
+	}
 
 	if err != nil {
+		log.Errorf("Failed to connect to MySQL database: %v", err)
 		return nil, err
 	}
 
@@ -93,7 +109,7 @@ func newMySQL() (*gorm.DB, error) {
 		sqlDB.SetMaxIdleConns(config.Cfg.Database.MySQL.MaxIdleConns)
 		sqlDB.SetMaxOpenConns(config.Cfg.Database.MySQL.SetMaxOpenConns)
 	}
-
+	log.Info("Establish connection to MySQL")
 	return database, nil
 }
 

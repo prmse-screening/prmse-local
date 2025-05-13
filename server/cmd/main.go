@@ -13,6 +13,7 @@ import (
 	"server/internal/config"
 	"server/internal/handlers"
 	"server/internal/logger"
+	"server/internal/middlewares"
 	"server/internal/models/responses"
 	"server/internal/schedule"
 	"syscall"
@@ -22,8 +23,7 @@ import (
 func NewServer(t *handlers.TasksHandler, d *handlers.DicomHandler, ts *schedule.TasksScheduler, c *schedule.TasksCleaner) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
-	//engine.Use(gin.Recovery(), middlewares.Logger(), cors.Default())
-	engine.Use(gin.Recovery(), cors.Default())
+	engine.Use(gin.Recovery(), middlewares.Logger(), cors.Default())
 
 	engine.GET("/ping", func(c *gin.Context) {
 		var response responses.BaseResponse
