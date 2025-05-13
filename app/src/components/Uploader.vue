@@ -27,7 +27,7 @@ import { uploadToS3 } from '@/apis/common.ts'
 import { open } from '@tauri-apps/plugin-dialog'
 import { TaskStatus } from '@/types'
 
-const curr = ref(0)
+const curr = ref(1)
 const isUploading = ref(false)
 const emit = defineEmits<{ (e: 'uploaded'): void }>()
 const totalTasks = ref(0)
@@ -76,6 +76,6 @@ const upload = async (entities: string[]) => {
     }
     emit('uploaded')
     isUploading.value = false
-    curr.value = 0
+    curr.value = 1
 }
 </script>
