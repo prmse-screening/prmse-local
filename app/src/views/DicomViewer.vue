@@ -80,7 +80,7 @@ import { generateImageIds, prefetchMetadataInformation, processS3ZipFile } from 
 import { getTask } from '@/apis'
 import { wadouri } from '@cornerstonejs/dicom-image-loader'
 import ResultCard from '@/components/ResultCard.vue'
-import ToolGroup from '@cornerstonejs/tools/dist/esm/store/ToolGroupManager/ToolGroup'
+import type IToolGroup from '@cornerstonejs/tools/types/IToolGroup'
 
 const router = useRouter()
 
@@ -89,7 +89,7 @@ const viewportIds = ['CT_AXIAL', 'CT_SAGITTAL', 'CT_CORONAL']
 const volumeId = 'volume:1'
 const toolGroupId = `group:${Date.now()}`
 
-const initTools = (): ToolGroup | undefined => {
+const initTools = (): IToolGroup | undefined => {
     const toolGroup = ToolGroupManager.createToolGroup(toolGroupId)
     addTool(StackScrollTool)
     addTool(WindowLevelTool)

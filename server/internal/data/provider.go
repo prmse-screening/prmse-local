@@ -80,8 +80,9 @@ func newMySQL() (*gorm.DB, error) {
 	var database *gorm.DB
 	var err error
 
-	maxRetries, baseInterval := 3, time.Second*3
+	maxRetries, baseInterval := 6, time.Second*3
 	for i := 0; i < maxRetries; i++ {
+		time.Sleep(baseInterval)
 		database, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 			SkipDefaultTransaction: true,
 			Logger: &sqlLogger{
@@ -94,10 +95,8 @@ func newMySQL() (*gorm.DB, error) {
 		if err == nil {
 			break
 		}
-
-		log.Errorf("MySQL connection failed, try again in %v", baseInterval)
-		time.Sleep(baseInterval)
 		baseInterval = baseInterval * (1 << i)
+		log.Errorf("MySQL connection failed, try again in %v", baseInterval)
 	}
 
 	if err != nil {

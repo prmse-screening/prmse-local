@@ -28,7 +28,6 @@ services:
   worker:
     image: worker:latest
     container_name: worker
-    with nvidia
     deploy:
       resources:
         reservations:
