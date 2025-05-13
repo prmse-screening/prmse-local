@@ -90,7 +90,7 @@ import {
     ZoomTool,
     PanTool,
 } from '@cornerstonejs/tools'
-import { deleteImageIds, generateImageIds, prefetchMetadataInformation, processS3ZipFile } from '@/utils'
+import { generateImageIds, prefetchMetadataInformation, processS3ZipFile } from '@/utils'
 import { getTask } from '@/apis'
 import { wadouri } from '@cornerstonejs/dicom-image-loader'
 import ResultCard from '@/components/ResultCard.vue'
@@ -104,7 +104,6 @@ const renderingEngineId = `renderingEngine:${taskId}`
 const viewportIds = [`CT_AXIAL_${taskId}`, `CT_SAGITTAL_${taskId}`, `CT_CORONAL_${taskId}`]
 const volumeId = `volume:${taskId}`
 const toolGroupId = `group:${taskId}`
-let imageIds = []
 
 const initTools = (): IToolGroup | undefined => {
     const toolGroup = ToolGroupManager.createToolGroup(toolGroupId)
@@ -216,7 +215,7 @@ onMounted(async () => {
         const files = await processS3ZipFile(res.id)
         loading.value = false
         if (!files) return
-        imageIds = generateImageIds(files)
+        const imageIds = generateImageIds(files)
         await render(imageIds)
     }
     loading.value = false
@@ -224,6 +223,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
     wadouri.fileManager.purge()
+    wadouri.dataSetCacheManager.purge()
     ToolGroupManager.destroyToolGroup(toolGroupId)
     getRenderingEngine(renderingEngineId)?.destroy()
     cache.purgeCache()

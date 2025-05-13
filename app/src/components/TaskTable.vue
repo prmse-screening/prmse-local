@@ -5,8 +5,8 @@
             <span class="text-h6">Tasks</span>
         </v-card-title>
         <v-card-item>
-            <v-row class="align-center justify-space-between" no-gutters>
-                <v-col cols="12" md="6" class="mb-2 mb-md-0">
+            <v-row class="align-center justify-space-between mb-2" no-gutters>
+                <v-col cols="12" md="4">
                     <v-text-field
                         v-model="series"
                         density="compact"
@@ -18,7 +18,7 @@
                         single-line
                     />
                 </v-col>
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="4">
                     <v-select
                         v-model="status"
                         flat
@@ -33,10 +33,9 @@
                         density="compact"
                         label="Filter by status"
                         clearable
-                        style="width: 100%"
                     />
                 </v-col>
-                <v-col cols="12" md="auto" class="d-flex align-center mb-2 mb-md-0">
+                <v-col cols="12" md="auto">
                     <v-btn
                         prepend-icon="mdi-export-variant"
                         color="primary"
@@ -47,8 +46,13 @@
                         Export
                     </v-btn>
                 </v-col>
-                <v-col cols="12" md="auto" class="d-flex align-center mb-2 mb-md-0">
-                    <v-btn prepend-icon="mdi-refresh" color="secondary" variant="tonal" @click="refresh">
+                <v-col cols="12" md="auto">
+                    <v-btn
+                        prepend-icon="mdi-refresh"
+                        color="secondary"
+                        variant="tonal"
+                        @click="refresh"
+                    >
                         Refresh
                     </v-btn>
                 </v-col>
@@ -101,17 +105,17 @@
                     </v-menu>
                 </div>
             </template>
-<!--            <template v-slot:no-data>-->
-<!--                <v-btn-->
-<!--                    prepend-icon="mdi-backup-restore"-->
-<!--                    color="primary"-->
-<!--                    variant="tonal"-->
-<!--                    border-->
-<!--                    @click="loadItems({ page: 1, itemsPerPage: 10 })"-->
-<!--                >-->
-<!--                    Reset data-->
-<!--                </v-btn>-->
-<!--            </template>-->
+            <!--            <template v-slot:no-data>-->
+            <!--                <v-btn-->
+            <!--                    prepend-icon="mdi-backup-restore"-->
+            <!--                    color="primary"-->
+            <!--                    variant="tonal"-->
+            <!--                    border-->
+            <!--                    @click="loadItems({ page: 1, itemsPerPage: 10 })"-->
+            <!--                >-->
+            <!--                    Reset data-->
+            <!--                </v-btn>-->
+            <!--            </template>-->
         </v-data-table-server>
     </v-card>
 </template>
@@ -157,18 +161,14 @@ const series = ref('')
 const status = ref<TaskStatus | undefined>(undefined)
 const serverItems = ref<Task[]>([])
 
-const triggerLoad = () => search.value = Date.now().toString()
+const triggerLoad = () => (search.value = Date.now().toString())
 const refresh = () => triggerLoad()
 
 watchDebounced([series, status], () => triggerLoad(), { debounce: 500, maxWait: 1000 })
 
 defineExpose({ refresh })
 
-const { pause, resume } = useIntervalFn(
-    async () => refresh(),
-    3000,
-    { immediate: false }
-)
+const { pause, resume } = useIntervalFn(async () => refresh(), 3000, { immediate: false })
 
 const viewItem = async (id: number) => {
     await router.replace({ name: 'Viewer', params: { id } })

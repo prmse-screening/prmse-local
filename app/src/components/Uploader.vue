@@ -53,7 +53,6 @@ const upload = async (entities: string[]) => {
     isUploading.value = true
     for (const entity of entities) {
         try {
-            console.log(entity)
             const series = await processDirectory(entity)
             if (!series) continue
 
