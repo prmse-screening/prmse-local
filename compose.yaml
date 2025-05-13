@@ -25,18 +25,18 @@ services:
     ports:
       - "3306:3306"
   
-  # worker:
-  #   image: worker:latest
-  #   container_name: worker
-  #   # with nvidia
-  #   # deploy:
-  #   #   resources:
-  #   #     reservations:
-  #   #       devices:
-  #   #         - driver: nvidia
-  #   #           count: all
-  #   #           capabilities: [gpu]
-  #   network_mode: host
+  worker:
+    image: worker:latest
+    container_name: worker
+    with nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    network_mode: host
 
   server:
     image: server:latest
@@ -46,5 +46,5 @@ services:
     depends_on:
       - mysql
       - minio
-      # - worker
+      - worker
     network_mode: host
