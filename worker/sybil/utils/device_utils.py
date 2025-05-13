@@ -81,8 +81,6 @@ def get_most_suitable_device(min_free_memory=7 * 1000 ** 3):
     """
     if torch.cuda.is_available():
         num_gpus = torch.cuda.device_count()
-        if num_gpus == 0:
-            return None
 
         most_free_idx, most_free_val = -1, -1
         for i in range(num_gpus):
