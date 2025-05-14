@@ -41,9 +41,9 @@ export const getSeries = async (file: File) => {
 //     return results
 // }
 
-export const listLeafFolders = async (dir: string): Promise<string[] | undefined> => {
+export const listLeafFolders = async (dir: string[]): Promise<string[] | undefined> => {
     try {
-        return await invoke<string[]>('list_leaf_folders', { root: dir })
+        return await invoke<string[]>('list_leaf_folders', { roots: dir })
     } catch (e) {
         toast.error(`Failed to list leaf folders in ${dir}`)
         console.error(e)
