@@ -14,6 +14,7 @@ const request = async <T>(url: string, method: 'GET' | 'POST', body?: any): Prom
             headers,
             method,
             body: body ?? null,
+            connectTimeout: 3000
         })
         const json: BaseResponse = await response.json()
         if (json.status === 'error') {
@@ -23,10 +24,9 @@ const request = async <T>(url: string, method: 'GET' | 'POST', body?: any): Prom
         return json.data as T
     } catch (e: any) {
         console.error('HTTP Error:', e)
-        toast.error(e.message || 'Network error')
+        toast.error('Failed to connect server')
         localStorage.removeItem('base')
         await router.replace({ name: 'Config' })
-        console.log('Redirect to config page')
         return null
     }
 }
