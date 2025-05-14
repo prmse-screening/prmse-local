@@ -95,7 +95,7 @@ func newMySQL() (*gorm.DB, error) {
 		if err == nil {
 			break
 		}
-		baseInterval = baseInterval * (1 << i)
+		baseInterval = baseInterval * (1 << (i + 1))
 		log.Errorf("MySQL connection failed, try again in %v", baseInterval)
 	}
 

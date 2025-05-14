@@ -5,6 +5,7 @@ import { wadouri } from '@cornerstonejs/dicom-image-loader'
 import { parseDownloadUrl } from '@/apis/common.ts'
 import { invoke } from '@tauri-apps/api/core'
 import { toast } from 'vue-sonner'
+import { uuidv4 } from '@cornerstonejs/core/utilities'
 
 export const getSeries = async (file: File) => {
     const arrayBuffer = await file.arrayBuffer()
@@ -74,7 +75,7 @@ export const listLeafFolders = async (dir: string): Promise<string[] | undefined
 // }
 
 export const processDirectory = async (dir: string) => {
-    return await invoke<string | undefined>('process_dir', {root:dir})
+    return await invoke<string | undefined>('process_dir', { root: dir })
 }
 
 // export const compressFilesToZip = async (files: File[]): Promise<File> => {
@@ -120,7 +121,12 @@ export const prefetchMetadataInformation = async (imageIdsToPrefetch: string[]) 
     await Promise.all(imageIdsToPrefetch.map((id) => wadouri.loadImage(id).promise))
 }
 
-export const generateImageIds = (files: File[]) => files.map((file) => wadouri.fileManager.add(file))
+export const generateImageIds = (files: File[]) => {
+    return files.map((file) => {
+        const fileId = wadouri.fileManager.add(file)
+        return `${fileId}#${uuidv4()}`
+    })
+}
 
 export const processS3ZipFile = async (id: number): Promise<File[] | undefined> => {
     try {

@@ -2,10 +2,8 @@ import { toast } from 'vue-sonner'
 import type { BaseResponse, S3UploadForm } from '@/types'
 import { fetch } from '@tauri-apps/plugin-http'
 import { invoke } from '@tauri-apps/api/core'
-import { useRouter } from 'vue-router'
-import router from "@/router";
+import router from '@/router'
 
-export const BASE_URL = 'http://localhost:8080'
 const request = async <T>(url: string, method: 'GET' | 'POST', body?: any): Promise<T | null> => {
     try {
         const headers: Record<string, string> = {}
@@ -81,6 +79,6 @@ export const parseExportUrl = (status?: number, series?: string) => {
     if (status != null) params.status = status.toString()
     if (series && series != '') params.series = series.trim()
 
-    if (Object.keys(params).length === 0) return `${BASE_URL}/tasks/export`
-    return `${BASE_URL}/tasks/export?${new URLSearchParams(params)}`
+    if (Object.keys(params).length === 0) return `${localStorage.getItem('base')}/tasks/export`
+    return `${localStorage.getItem('base')}/tasks/export?${new URLSearchParams(params)}`
 }

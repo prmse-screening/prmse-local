@@ -33,7 +33,7 @@ def get_available_devices(num_devices=None, max_devices=None):
     else:
         num_devices = num_devices if num_devices else torch.multiprocessing.cpu_count()
         num_devices = min(num_devices, max_devices) if max_devices is not None else num_devices
-        return [device]*num_devices
+        return [device] * num_devices
 
 
 def get_device(gpu_id: int):
@@ -72,7 +72,7 @@ def get_most_free_gpu():
     return torch.device(f'cuda:{most_free_idx}')
 
 
-def get_most_suitable_device(min_free_memory=7.5 * 1024 ** 3):
+def get_most_suitable_device(min_free_memory=7 * 1000 ** 3):
     """
     Get most suitable device, if cuda is available and max free memory is large then the requirement,
     otherwise, use mps (if available) or cpu.
@@ -81,8 +81,6 @@ def get_most_suitable_device(min_free_memory=7.5 * 1024 ** 3):
     """
     if torch.cuda.is_available():
         num_gpus = torch.cuda.device_count()
-        if num_gpus == 0:
-            return None
 
         most_free_idx, most_free_val = -1, -1
         for i in range(num_gpus):

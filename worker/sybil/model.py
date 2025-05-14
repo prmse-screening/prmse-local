@@ -430,7 +430,7 @@ class Sybil:
 
         Motivation is to enable multiprocessing without the processes needed to communicate.
         """
-        if not torch.cuda.is_available():
+        if not torch.cuda.is_available() or self.device == torch.device('cpu') or self.device == torch.device('mps'):
             return get_most_suitable_device()
 
         # Get size of the model in memory (approximate)
