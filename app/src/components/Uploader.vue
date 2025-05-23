@@ -12,7 +12,8 @@
                 <span class="text-subtitle-1">Processing cases {{ curr }} / {{ totalTasks }}...</span>
             </div>
             <div v-else class="text-center d-flex flex-column align-center justify-center" style="min-height: 35vh">
-                <v-icon size="90" color="primary" class="mb-4" icon="mdi-cloud-upload" />
+                <v-icon size="90" color="primary" icon="mdi-cloud-upload" />
+                <span class="text-subtitle-2 mb-2">Maximal 100 CT series</span>
                 <v-btn color="primary" size="large" variant="elevated" @click="openDialog">Browse files</v-btn>
             </div>
         </v-card-item>
@@ -35,11 +36,14 @@ const totalTasks = ref(0)
 const openDialog = async () => {
     try {
         const dir = await open({
-            multiple: false,
+            multiple: true,
             directory: true,
-            openLabel: 'Select a folder',
+            openLabel: 'Select folders',
         })
         if (!dir) return
+        if (dir.length > 100) {
+            dir.splice(100)
+        }
         const entities = await listLeafFolders(dir)
         if (!entities) return
         totalTasks.value = entities.length

@@ -66,9 +66,9 @@ async fn upload(url: String, folder: String, form: HashMap<String, String>) -> A
 }
 
 #[tauri::command]
-async fn list_leaf_folders(root: String) -> AppResult<Vec<String>> {
+async fn list_leaf_folders(roots: Vec<String>) -> AppResult<Vec<String>> {
     let mut result = Vec::new();
-    let mut stack = vec![PathBuf::from(root)];
+    let mut stack = roots.into_iter().map(PathBuf::from).collect::<Vec<PathBuf>>();
 
     while let Some(dir) = stack.pop() {
         let mut is_leaf = true;
@@ -76,9 +76,11 @@ async fn list_leaf_folders(root: String) -> AppResult<Vec<String>> {
         if let Ok(mut entries) = fs::read_dir(&dir).await {
             while let Some(entry) = entries.next_entry().await? {
                 let path = entry.path();
-                if fs::metadata(&path).await?.is_dir() {
-                    is_leaf = false;
-                    stack.push(path);
+                if let Ok(meta) = fs::metadata(&path).await {
+                    if meta.is_dir() {
+                        is_leaf = false;
+                        stack.push(path);
+                    }
                 }
             }
         }
@@ -88,6 +90,9 @@ async fn list_leaf_folders(root: String) -> AppResult<Vec<String>> {
         }
     }
 
+    if result.len() > 100 {
+        result.truncate(100);
+    }
     Ok(result)
 }
 
